@@ -5,7 +5,7 @@
   "Description": "并行仿真沙箱 Realm 框架（独立 Project、可选 Realms/ 持久化）",
   "ScVersion": "2.4",
   "Link": "https://github.com/CS-LX/RealmEX",
-  "Author": "LX..,镁生素",
+  "Author": "LX..",
   "PackageName": "com.realmex",
   "Dependencies": {}
 }
