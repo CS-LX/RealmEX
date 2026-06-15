@@ -1,0 +1,13 @@
+## .NET
+[Dd]ebug/
+[Rr]elease/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+artifacts/
+*.user
+.vs/
+.idea/
+
+tools/pack.config.json
