@@ -27,6 +27,14 @@ jobs:
       - name: Build
         run: dotnet build RealmEX.csproj -c Release --no-restore -p:RealmEXSkipPack=true -p:RealmEXSkipSyncVersion=true
 
+      - name: Validate P1 sandbox template
+        shell: pwsh
+        run: |
+          $template = Join-Path $env:GITHUB_WORKSPACE "bin/Release/net10.0/Assets/RealmEX/SandboxProjectTemplate.xdb"
+          if (-not (Test-Path $template)) {
+            throw "P1 sandbox template was not copied to build output: $template"
+          }
+
       - name: Pack scmod
         shell: pwsh
         run: |

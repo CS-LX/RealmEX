@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.Net.Sdk">
 	<PropertyGroup>
 		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -41,9 +41,16 @@
 	<ItemGroup>
 		<Compile Include="RealmEXLoader.cs" />
 		<Compile Include="RealmHost.cs" />
+		<Compile Include="RealmBootstrap.cs" />
+		<Compile Include="RealmM1Diagnostics.cs" />
+		<Compile Include="SandboxProject.cs" />
+		<Compile Include="Subsystems\SandboxSubsystemPlayers.cs" />
 		<Compile Include="Properties\AssemblyInfo.cs" />
 	</ItemGroup>
 	<ItemGroup>
+		<None Update="Assets\RealmEX\SandboxProjectTemplate.xdb">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="modinfo.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
