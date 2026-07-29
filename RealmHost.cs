@@ -11,13 +11,16 @@ namespace RealmEX
     /// </summary>
     public static class RealmHost
     {
-        private static readonly Dictionary<string, SandboxProject> m_sandboxes =
+        private static readonly Dictionary<string, SandboxRealm> m_realms =
             new(StringComparer.OrdinalIgnoreCase);
         private static bool m_isTicking;
 
         public static bool IsInitialized { get; private set; }
 
-        public static IReadOnlyCollection<SandboxProject> ActiveSandboxes => m_sandboxes.Values.ToArray();
+        public static IReadOnlyCollection<SandboxRealm> ActiveRealms => m_realms.Values.ToArray();
+
+        public static IReadOnlyCollection<SandboxProject> ActiveSandboxes =>
+            m_realms.Values.Select(realm => realm.Project).ToArray();
 
         public static void Initialize()
         {
@@ -31,34 +34,50 @@ namespace RealmEX
 
         public static SandboxProject CreateSandbox(string realmId, ValuesDictionary overrides = null)
         {
+            return CreateRealm(realmId, null, overrides).Project;
+        }
+
+        public static SandboxRealm CreateRealm(
+            string realmId,
+            RealmProfile profile = null,
+            ValuesDictionary overrides = null)
+        {
             Initialize();
             string normalizedId = NormalizeRealmId(realmId);
-            if (m_sandboxes.ContainsKey(normalizedId))
+            if (m_realms.ContainsKey(normalizedId))
             {
                 throw new InvalidOperationException($"Realm \"{normalizedId}\" already exists.");
             }
 
             SandboxProject sandbox = RealmBootstrap.Create(normalizedId, overrides);
-            m_sandboxes.Add(normalizedId, sandbox);
-            return sandbox;
+            RealmProfile realmProfile = profile ?? new RealmProfile();
+            realmProfile.RealmId = normalizedId;
+            SandboxRealm realm = new(sandbox, realmProfile);
+            m_realms.Add(normalizedId, realm);
+            return realm;
         }
 
         public static bool DestroySandbox(string realmId)
         {
+            return DestroyRealm(realmId);
+        }
+
+        public static bool DestroyRealm(string realmId)
+        {
             string normalizedId = NormalizeRealmId(realmId);
-            if (!m_sandboxes.Remove(normalizedId, out SandboxProject sandbox))
+            if (!m_realms.Remove(normalizedId, out SandboxRealm realm))
             {
                 return false;
             }
 
-            sandbox.Dispose();
+            realm.Dispose();
             return true;
         }
 
         public static int TickParallel(float mainWorldDt)
         {
             _ = mainWorldDt;
-            if (m_isTicking || m_sandboxes.Count == 0)
+            if (m_isTicking || m_realms.Count == 0)
             {
                 return 0;
             }
@@ -67,21 +86,21 @@ namespace RealmEX
             m_isTicking = true;
             try
             {
-                foreach (SandboxProject sandbox in m_sandboxes.Values.ToArray())
+                foreach (SandboxRealm realm in m_realms.Values.ToArray())
                 {
-                    if (sandbox.IsDisposed)
+                    if (realm.IsDisposed || !realm.Profile.ParallelTick)
                     {
                         continue;
                     }
 
                     try
                     {
-                        sandbox.FindSubsystem<SubsystemUpdate>(true).Update();
+                        realm.Tick();
                         ticked++;
                     }
                     catch (Exception ex)
                     {
-                        Engine.Log.Error($"[RealmEX] Tick failed for Realm \"{sandbox.RealmId}\": {ex}");
+                        Engine.Log.Error($"[RealmEX] Tick failed for Realm \"{realm.RealmId}\": {ex}");
                     }
                 }
             }
@@ -94,17 +113,17 @@ namespace RealmEX
 
         public static void DisposeAll()
         {
-            SandboxProject[] sandboxes = m_sandboxes.Values.ToArray();
-            m_sandboxes.Clear();
-            foreach (SandboxProject sandbox in sandboxes)
+            SandboxRealm[] realms = m_realms.Values.ToArray();
+            m_realms.Clear();
+            foreach (SandboxRealm realm in realms)
             {
                 try
                 {
-                    sandbox.Dispose();
+                    realm.Dispose();
                 }
                 catch (Exception ex)
                 {
-                    Engine.Log.Error($"[RealmEX] Failed to dispose Realm \"{sandbox.RealmId}\": {ex}");
+                    Engine.Log.Error($"[RealmEX] Failed to dispose Realm \"{realm.RealmId}\": {ex}");
                 }
             }
         }
