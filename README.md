@@ -54,6 +54,21 @@ dotnet build RealmEX.csproj -c Release -p:RealmEXSkipPack=true
 
 `deviceTerrain=NOT_TESTED` 表示本入口只验证独立 Project、Players / Time / Update、Save 护栏和 Host 生命周期；含 Terrain / BlockEntity 的设备级 M1 仍需后续入口。
 
+## P2 并行 Tick 测试入口
+
+1. 构建并部署 RealmEX，启动游戏后进入任意主世界。
+2. 日志出现 `[RealmEX/M2] READY` 后按一次 **F9**。
+3. 等待约 2 秒后正常退出世界。
+4. 检查 Mods 目录上一级的 `Game.log`，若不存在则查 `Bugs/Game.log`，搜索 `[RealmEX/M2]`。
+
+通过时会输出：
+
+```text
+[RealmEX/M2] RESULT=PASS scope=P2Tick
+```
+
+该入口会创建一个短生命周期内存沙箱，并由 `RealmHost.TickParallel` 在主世界帧更新后推进数帧，验证主世界时间与沙箱时间都连续前进。该检查已通过游戏内验证。
+
 ## 内容模组接入（规划）
 
 内容模组在 `modinfo.json` 声明 `"com.realmex": "x.x.x"`，通过 `IRealmProjectTemplateContributor`（待实现）扩展 `SandboxProjectTemplate`，注册自有 Subsystem / Component。**RealmEX 核心不包含任何内容模组专有语义。**

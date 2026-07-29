@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Game;
 using TemplatesDatabase;
 
 namespace RealmEX
@@ -12,6 +13,7 @@ namespace RealmEX
     {
         private static readonly Dictionary<string, SandboxProject> m_sandboxes =
             new(StringComparer.OrdinalIgnoreCase);
+        private static bool m_isTicking;
 
         public static bool IsInitialized { get; private set; }
 
@@ -51,6 +53,43 @@ namespace RealmEX
 
             sandbox.Dispose();
             return true;
+        }
+
+        public static int TickParallel(float mainWorldDt)
+        {
+            _ = mainWorldDt;
+            if (m_isTicking || m_sandboxes.Count == 0)
+            {
+                return 0;
+            }
+
+            int ticked = 0;
+            m_isTicking = true;
+            try
+            {
+                foreach (SandboxProject sandbox in m_sandboxes.Values.ToArray())
+                {
+                    if (sandbox.IsDisposed)
+                    {
+                        continue;
+                    }
+
+                    try
+                    {
+                        sandbox.FindSubsystem<SubsystemUpdate>(true).Update();
+                        ticked++;
+                    }
+                    catch (Exception ex)
+                    {
+                        Engine.Log.Error($"[RealmEX] Tick failed for Realm \"{sandbox.RealmId}\": {ex}");
+                    }
+                }
+            }
+            finally
+            {
+                m_isTicking = false;
+            }
+            return ticked;
         }
 
         public static void DisposeAll()

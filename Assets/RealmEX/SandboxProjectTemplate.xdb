@@ -4,7 +4,9 @@
 			<Parameter Name="Class" Guid="44df1243-c7b0-4daf-a7dc-c01957bf319a" Value="RealmEX.Subsystems.SandboxSubsystemPlayers" Type="string" />
 			<Parameter Name="Dependencies" Guid="10a92a2c-adf9-46dd-971e-07ce00da43cc" Value="" Type="string" />
 		</MemberSubsystemTemplate>
-		<MemberSubsystemTemplate Name="Time" Guid="81d078fa-8a20-4416-80cd-6e9ec7272d2d" InheritanceParent="73bbc39a-6cf8-470b-b008-fb9aef611caa" />
+		<MemberSubsystemTemplate Name="Time" Guid="81d078fa-8a20-4416-80cd-6e9ec7272d2d" InheritanceParent="73bbc39a-6cf8-470b-b008-fb9aef611caa">
+			<Parameter Name="Class" Guid="ba8dd81e-ee38-42af-b1bd-131762f825fc" Value="RealmEX.Subsystems.SandboxSubsystemTime" Type="string" />
+		</MemberSubsystemTemplate>
 		<MemberSubsystemTemplate Name="Update" Guid="2c475946-2d06-4609-8379-167ef67399d0" InheritanceParent="743dceeb-03d9-4d12-9c0a-3e9774a6afe6" />
 	</ProjectTemplate>
 </RealmEX>

@@ -43,8 +43,10 @@
 		<Compile Include="RealmHost.cs" />
 		<Compile Include="RealmBootstrap.cs" />
 		<Compile Include="RealmM1Diagnostics.cs" />
+		<Compile Include="RealmM2Diagnostics.cs" />
 		<Compile Include="SandboxProject.cs" />
 		<Compile Include="Subsystems\SandboxSubsystemPlayers.cs" />
+		<Compile Include="Subsystems\SandboxSubsystemTime.cs" />
 		<Compile Include="Properties\AssemblyInfo.cs" />
 	</ItemGroup>
 	<ItemGroup>
