@@ -8,7 +8,7 @@ using RealmEX.Core;
 namespace RealmEX.Presets.Ponder
 {
     /// <summary>
-    /// 可见 Ponder 页面：标题、Realm 视口、caption、步骤进度与关闭按钮。
+    /// Create / SCIENEW 风格 Ponder：全屏半透明黑 mask + 居中方块视口，无面板框。
     /// </summary>
     public sealed class RealmPonderDialog : Dialog
     {
@@ -16,11 +16,8 @@ namespace RealmEX.Presets.Ponder
 
         private readonly string m_realmId;
         private readonly RealmPonderTutorial m_tutorial;
-        private readonly LabelWidget m_titleLabel;
         private readonly LabelWidget m_captionLabel;
-        private readonly LabelWidget m_progressLabel;
         private readonly RealmPonderWidget m_viewportWidget;
-        private readonly BevelledButtonWidget m_closeButton;
 
         private SandboxRealm m_realm;
         private RealmPonderBlockPresenter m_blockPresenter;
@@ -37,87 +34,43 @@ namespace RealmEX.Presets.Ponder
             HorizontalAlignment = WidgetAlignment.Stretch;
             VerticalAlignment = WidgetAlignment.Stretch;
 
+            // 唯一遮罩：20% 不透明度黑，用于和主世界区分。
             Children.Add(new RectangleWidget
             {
-                FillColor = new Color(0, 0, 0, 160),
+                FillColor = new Color(0, 0, 0, 51),
                 OutlineColor = Color.Transparent,
                 HorizontalAlignment = WidgetAlignment.Stretch,
-                VerticalAlignment = WidgetAlignment.Stretch
+                VerticalAlignment = WidgetAlignment.Stretch,
+                IsHitTestVisible = true
             });
 
-            CanvasWidget panel = new()
+            StackPanelWidget content = new()
             {
-                Size = new Vector2(760f, 560f),
+                Direction = LayoutDirection.Vertical,
                 HorizontalAlignment = WidgetAlignment.Center,
                 VerticalAlignment = WidgetAlignment.Center
             };
-            Children.Add(panel);
-
-            panel.Children.Add(new RectangleWidget
-            {
-                FillColor = new Color(28, 30, 38, 245),
-                OutlineColor = new Color(110, 118, 140),
-                HorizontalAlignment = WidgetAlignment.Stretch,
-                VerticalAlignment = WidgetAlignment.Stretch
-            });
-
-            StackPanelWidget stack = new()
-            {
-                Direction = LayoutDirection.Vertical,
-                HorizontalAlignment = WidgetAlignment.Stretch,
-                VerticalAlignment = WidgetAlignment.Stretch
-            };
-            stack.MarginLeft = 18f;
-            stack.MarginRight = 18f;
-            stack.MarginTop = 16f;
-            stack.MarginBottom = 16f;
-            panel.Children.Add(stack);
-
-            m_titleLabel = new LabelWidget
-            {
-                Text = m_tutorial.Title,
-                Color = Color.White,
-                FontScale = 1.15f,
-                HorizontalAlignment = WidgetAlignment.Center,
-                Margin = new Vector2(0f, 8f)
-            };
-            stack.Children.Add(m_titleLabel);
+            Children.Add(content);
 
             m_viewportWidget = new RealmPonderWidget
             {
-                Size = new Vector2(720f, 360f),
+                Size = new Vector2(820f, 520f),
                 HorizontalAlignment = WidgetAlignment.Center,
-                Margin = new Vector2(0f, 8f)
+                VerticalAlignment = WidgetAlignment.Center
             };
-            stack.Children.Add(m_viewportWidget);
+            content.Children.Add(m_viewportWidget);
 
             m_captionLabel = new LabelWidget
             {
                 Text = string.Empty,
-                Color = new Color(220, 220, 230),
+                Color = Color.White,
+                FontScale = 0.95f,
                 WordWrap = true,
                 TextAnchor = TextAnchor.HorizontalCenter,
                 HorizontalAlignment = WidgetAlignment.Center,
-                Margin = new Vector2(8f, 6f)
+                Margin = new Vector2(24f, 18f)
             };
-            stack.Children.Add(m_captionLabel);
-
-            m_progressLabel = new LabelWidget
-            {
-                Text = string.Empty,
-                Color = new Color(160, 170, 190),
-                HorizontalAlignment = WidgetAlignment.Center,
-                Margin = new Vector2(0f, 8f)
-            };
-            stack.Children.Add(m_progressLabel);
-
-            m_closeButton = new BevelledButtonWidget
-            {
-                Text = "关闭",
-                Size = new Vector2(160f, 48f),
-                HorizontalAlignment = WidgetAlignment.Center
-            };
-            stack.Children.Add(m_closeButton);
+            content.Children.Add(m_captionLabel);
 
             StartPlayback();
         }
@@ -145,7 +98,7 @@ namespace RealmEX.Presets.Ponder
                 }
             }
 
-            if (Input.Cancel || Input.Back || m_closeButton.IsClicked)
+            if (Input.Cancel || Input.Back)
             {
                 Close();
             }
@@ -179,6 +132,7 @@ namespace RealmEX.Presets.Ponder
                 m_realmId,
                 projectTemplateName: RealmBootstrap.PonderProjectTemplateName);
             m_realm.Viewport.IsEnabled = true;
+            m_realm.Viewport.ClearColor = Color.Transparent;
             m_blockPresenter = new RealmPonderBlockPresenter();
             m_blockPresenter.Attach(m_realm);
             m_viewportWidget.Setup(m_realm);
@@ -187,13 +141,17 @@ namespace RealmEX.Presets.Ponder
                 OnStepStarted);
             RefreshLabels();
             Engine.Log.Information(
-                $"[RealmEX/Ponder] UI=OPEN tutorial={m_tutorial.Id} title=\"{m_tutorial.Title}\" steps={m_tutorial.Steps.Count}");
+                $"[RealmEX/Ponder] UI=OPEN tutorial={m_tutorial.Id} title=\"{m_tutorial.Title}\" steps={m_tutorial.StepCount} style=create-mask");
         }
 
         private void OnStepStarted(RealmPonderStep step)
         {
             m_currentStep = step;
             m_currentStepIndex++;
+            if (m_realm != null)
+            {
+                m_realm.Viewport.ClearColor = Color.Transparent;
+            }
             m_blockPresenter?.Invalidate();
             RefreshLabels();
             Engine.Log.Information(
@@ -202,12 +160,7 @@ namespace RealmEX.Presets.Ponder
 
         private void RefreshLabels()
         {
-            int total = Math.Max(1, m_tutorial.StepCount);
-            int shown = m_currentStepIndex < 0 ? 0 : Math.Min(m_currentStepIndex + 1, total);
-            m_captionLabel.Text = m_currentStep?.Caption ?? "准备播放…";
-            m_progressLabel.Text = m_isCompleted
-                ? $"完成 · {total}/{total}"
-                : $"步骤 {shown}/{total}";
+            m_captionLabel.Text = m_currentStep?.Caption ?? string.Empty;
         }
 
         private void CleanupRealm()

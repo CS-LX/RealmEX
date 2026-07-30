@@ -6,7 +6,7 @@ using RealmEX.Presets.Ponder;
 namespace RealmEX.Diagnostics
 {
     /// <summary>
-    /// F6 打开可见南瓜 Ponder Dialog（真实方块场景 + caption）。
+    /// F6 打开可见与门 Ponder Dialog（真实方块真值表 + caption）。
     /// </summary>
     public static class RealmPonderDiagnostics
     {
@@ -29,7 +29,7 @@ namespace RealmEX.Diagnostics
                 }
 
                 stage = "create-dialog";
-                RealmPonderTutorial tutorial = RealmPonderSamples.CreatePumpkinTutorial();
+                RealmPonderTutorial tutorial = RealmPonderSamples.CreateAndGateTutorial();
                 m_dialog = new RealmPonderDialog(tutorial);
                 DialogsManager.ShowDialog(RealmPonderDialog.FindHostWidget(), m_dialog);
                 Engine.Log.Information(
@@ -37,7 +37,7 @@ namespace RealmEX.Diagnostics
             }
             catch (Exception ex)
             {
-                Engine.Log.Error($"[RealmEX/Ponder] RESULT=FAIL tutorial=pumpkin stage={stage} exception={ex}");
+                Engine.Log.Error($"[RealmEX/Ponder] RESULT=FAIL tutorial=and-gate stage={stage} exception={ex}");
                 Cancel();
             }
         }

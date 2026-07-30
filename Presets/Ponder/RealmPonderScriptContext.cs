@@ -35,15 +35,8 @@ namespace RealmEX.Presets.Ponder
             RealmPonderStep step = new(sceneName, timeFactor, caption, 0.0, layout != null);
             await m_storyboardContext.ApplyScene(new RealmScene(sceneName, timeFactor));
             layout?.Invoke(Realm, sceneName);
-            if (clearColor.HasValue)
-            {
-                Realm.Viewport.ClearColor = clearColor.Value;
-            }
-            else
-            {
-                RealmPonderVisuals.ApplySceneStyle(Realm, sceneName);
-            }
-
+            // 颜色由流程显式控制；未指定时保持透明，方块叠在 Dialog mask 上。
+            Realm.Viewport.ClearColor = clearColor ?? Color.Transparent;
             Camera.Apply();
             m_stepStarted?.Invoke(step);
         }

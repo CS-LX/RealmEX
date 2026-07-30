@@ -110,10 +110,17 @@ namespace RealmEX.Presets.Ponder
                 }
             }
 
+            // GenerateWireVertices 在 SubsystemElectricity==null 时直接 return；
+            // 只需挂上沙箱 Terrain，供邻接查询画出导线/器件端子，不跑仿真。
+            SubsystemElectricity electricityForMeshes = new()
+            {
+                SubsystemTerrain = sandboxTerrain
+            };
+
             m_generator = new BlockGeometryGenerator(
                 meshTerrain,
                 sandboxTerrain,
-                null,
+                electricityForMeshes,
                 furniture,
                 null,
                 palette);

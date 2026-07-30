@@ -48,7 +48,7 @@ namespace RealmEX.Presets.Ponder
                 0,
                 DepthStencilState.None,
                 RasterizerState.CullNoneScissor,
-                BlendState.Opaque,
+                BlendState.AlphaBlend,
                 SamplerState.PointClamp);
             int count = batch.TriangleVertices.Count;
             batch.QueueQuad(Vector2.Zero, ActualSize, 0f, Vector2.Zero, Vector2.One, GlobalColorTransform);

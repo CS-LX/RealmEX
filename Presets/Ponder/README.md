@@ -6,23 +6,20 @@ Ponder 预设用于教程、演示、镜头脚本、标注和配置化场景展�
 
 ## 当前最小闭环
 
-- `RealmPonderTutorial`：教程数据容器。
-- `RealmPonderScriptContext`：Create 风格脚本入口，教程用 `await` 串联步骤。
+- `RealmPonderTutorial`：教程数据容器，支持 Create 风格 `SetScript`。
+- `RealmPonderScriptContext`：`await ShowScene` / `await Hold`；清屏色由脚本显式传入。
 - `RealmPonderCameraActions`：可 await 的摄像机动作，例如 `RotateBy(..., RealmPonderEase.SinInOut)`。
 - `RealmPonderPlayer`：把教程脚本转换成 Realm 自驱动 async `RealmStoryboard`。
-- `RealmPonderSamples.CreateNotGateTutorial()`：内置非门真值表示例。
-- `RealmPonderDialog` / `RealmPonderVisuals`：玩家可见页面、caption、步骤进度、镜头动画。
-- `RealmPonderPumpkinLayouts` / `RealmPonderBlockPresenter`：把泥土、耕地、南瓜生长阶段、南瓜灯写入沙箱 Terrain，并生成真实方块网格。
+- `RealmPonderDialog`：全屏 20% 黑 mask + 居中方块视口，无面板框。
+- `RealmPonderAndGateLayouts` / `RealmPonderPumpkinLayouts`：真实方块场景布局。
 
-F6 默认播放南瓜教程（Create 式分步）：田地 → 瓜苗 → 生长 → 成熟 → 南瓜灯。方块数据在 `RealmEXPonderProject` 沙箱内，不泄漏到主世界。
+F6 默认播放**与门**教程：介绍 → 00 → 10 → 01 → 11 → 口诀。
 
 脚本风格：
 
 ```csharp
-await ponder.ShowScene("pumpkin-soil", "先翻出一块松软的田地，上面要留空。", RealmPonderPumpkinLayouts.Apply);
-await ponder.Camera.RotateBy(45f, 1.2, RealmPonderEase.SinInOut);
-await ponder.ShowScene("pumpkin-seedling", "把南瓜种子点在田地上，会出现小小的瓜苗。", RealmPonderPumpkinLayouts.Apply);
-await ponder.Camera.RotateBy(55f, 1.25, RealmPonderEase.SinInOut);
+await ponder.ShowScene("and-00", "输入 0 和 0：两边都断开，输出保持熄灭。", RealmPonderAndGateLayouts.Apply, clearColor: Color.Transparent);
+await ponder.Camera.RotateBy(50f, 1.15, RealmPonderEase.SinInOut);
 ```
 
-游戏内按 **F6** 打开可见 `[RealmEX/Ponder]` Dialog。
+游戏内按 **F6** 打开可见 `[RealmEX/Ponder]` Dialog。Esc / 返回关闭。
