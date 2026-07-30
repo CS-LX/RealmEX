@@ -14,6 +14,13 @@ namespace RealmEX.Presets.Ponder
             RealmStoryboard storyboard = new();
             storyboard.EnqueueAsync(async ctx =>
             {
+                if (tutorial.Script != null)
+                {
+                    RealmPonderScriptContext ponder = new(ctx, stepStarted);
+                    await tutorial.Script(ponder);
+                    return;
+                }
+
                 foreach (RealmPonderStep step in tutorial.Steps)
                 {
                     await ctx.ApplyScene(new RealmScene(step.SceneName, step.TimeFactor));

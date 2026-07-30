@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace RealmEX.Presets.Ponder
 {
@@ -7,7 +8,7 @@ namespace RealmEX.Presets.Ponder
     {
         private readonly List<RealmPonderStep> m_steps = [];
 
-        public RealmPonderTutorial(string id, string title)
+        public RealmPonderTutorial(string id, string title, int expectedStepCount = 0)
         {
             if (string.IsNullOrWhiteSpace(id))
             {
@@ -20,6 +21,7 @@ namespace RealmEX.Presets.Ponder
 
             Id = id.Trim();
             Title = title.Trim();
+            ExpectedStepCount = expectedStepCount;
         }
 
         public string Id { get; }
@@ -28,9 +30,26 @@ namespace RealmEX.Presets.Ponder
 
         public IReadOnlyList<RealmPonderStep> Steps => m_steps;
 
+        public int ExpectedStepCount { get; private set; }
+
+        public int StepCount => ExpectedStepCount > 0 ? ExpectedStepCount : m_steps.Count;
+
+        public Func<RealmPonderScriptContext, Task> Script { get; private set; }
+
         public RealmPonderTutorial AddStep(RealmPonderStep step)
         {
             m_steps.Add(step ?? throw new ArgumentNullException(nameof(step)));
+            return this;
+        }
+
+        public RealmPonderTutorial SetScript(Func<RealmPonderScriptContext, Task> script, int expectedStepCount)
+        {
+            Script = script ?? throw new ArgumentNullException(nameof(script));
+            if (expectedStepCount <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(expectedStepCount), "Expected step count must be positive.");
+            }
+            ExpectedStepCount = expectedStepCount;
             return this;
         }
     }

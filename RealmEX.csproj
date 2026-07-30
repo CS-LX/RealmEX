@@ -63,10 +63,13 @@
 		<Compile Include="Diagnostics\RealmM3Diagnostics.cs" />
 		<Compile Include="Diagnostics\RealmPonderDiagnostics.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderBlockPresenter.cs" />
+		<Compile Include="Presets\Ponder\RealmPonderCameraActions.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderDialog.cs" />
+		<Compile Include="Presets\Ponder\RealmPonderEase.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderPlayer.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderPumpkinLayouts.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderSamples.cs" />
+		<Compile Include="Presets\Ponder\RealmPonderScriptContext.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderStep.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderTutorial.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderVisuals.cs" />

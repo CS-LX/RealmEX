@@ -26,7 +26,6 @@ namespace RealmEX.Presets.Ponder
         private RealmPonderBlockPresenter m_blockPresenter;
         private RealmPonderStep m_currentStep;
         private int m_currentStepIndex = -1;
-        private float m_orbitRadians;
         private bool m_isCompleted;
         private bool m_isClosed;
 
@@ -138,12 +137,6 @@ namespace RealmEX.Presets.Ponder
 
             if (m_realm != null && !m_realm.IsDisposed)
             {
-                m_orbitRadians += Math.Max(0.001f, Time.FrameDuration) * 0.55f;
-                if (m_currentStep != null)
-                {
-                    RealmPonderVisuals.ApplyStep(m_realm, m_currentStep, Math.Max(0, m_currentStepIndex), m_orbitRadians);
-                }
-
                 if (!m_isCompleted && m_realm.Storyboard != null && m_realm.Storyboard.IsCompleted)
                 {
                     m_isCompleted = true;
@@ -201,7 +194,6 @@ namespace RealmEX.Presets.Ponder
         {
             m_currentStep = step;
             m_currentStepIndex++;
-            RealmPonderVisuals.ApplyStep(m_realm, step, m_currentStepIndex, m_orbitRadians);
             m_blockPresenter?.Invalidate();
             RefreshLabels();
             Engine.Log.Information(
@@ -210,11 +202,12 @@ namespace RealmEX.Presets.Ponder
 
         private void RefreshLabels()
         {
-            int shown = m_currentStepIndex < 0 ? 0 : Math.Min(m_currentStepIndex + 1, m_tutorial.Steps.Count);
+            int total = Math.Max(1, m_tutorial.StepCount);
+            int shown = m_currentStepIndex < 0 ? 0 : Math.Min(m_currentStepIndex + 1, total);
             m_captionLabel.Text = m_currentStep?.Caption ?? "准备播放…";
             m_progressLabel.Text = m_isCompleted
-                ? $"完成 · {m_tutorial.Steps.Count}/{m_tutorial.Steps.Count}"
-                : $"步骤 {shown}/{m_tutorial.Steps.Count}";
+                ? $"完成 · {total}/{total}"
+                : $"步骤 {shown}/{total}";
         }
 
         private void CleanupRealm()
