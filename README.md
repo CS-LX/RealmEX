@@ -16,7 +16,7 @@
 
 ## 当前进度
 
-P1 / P2 / P3a 核心已完成：`SandboxProject`、`RealmHost.TickParallel`、`SandboxRealm`、`RealmScene` 与 `RealmStoryboard` 已通过 F8 / F9 / F10 游戏内诊断。P3b 已完成模块边界归类，核心运行时位于 `Core`，诊断位于 `Diagnostics`，并预留 `Presets.Ponder` / `Presets.Create`。P3c 已落地 `RealmViewport` 离屏渲染核心与基础 `RealmPonderWidget`；M1T 已通过 F7 BlockEntity 注册与 Terrain cell 变更隔离游戏内诊断；P3d-async 已通过 F10 async Storyboard 诊断；P3d 已新增 F6 非门 Ponder 示例教程诊断；可选持久化与内容模组扩展入口仍在后续阶段。
+P1 / P2 / P3a 核心已完成：`SandboxProject`、`RealmHost.TickParallel`、`SandboxRealm`、`RealmScene` 与 `RealmStoryboard` 已通过 F8 / F9 / F10 游戏内诊断。P3b 已完成模块边界归类，核心运行时位于 `Core`，诊断位于 `Diagnostics`，并预留 `Presets.Ponder` / `Presets.Create`。P3c 已落地 `RealmViewport` 离屏渲染核心与基础 `RealmPonderWidget`；M1T 已通过 F7 BlockEntity 注册与 Terrain cell 变更隔离游戏内诊断；P3d-async 已通过 F10 async Storyboard 诊断；P3d 已新增 F6 非门 Ponder 示例教程诊断。下一步为 **P3e 可见 Ponder Dialog**（Core soft freeze：不大改 Core，改动主落 `Presets.Ponder`）；**P4 可选持久化已延后**；内容模组扩展入口仍在后续阶段。详情见 `docs/实施计划.md`。
 
 ## 文档
 
