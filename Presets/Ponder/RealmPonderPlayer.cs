@@ -17,6 +17,11 @@ namespace RealmEX.Presets.Ponder
                 foreach (RealmPonderStep step in tutorial.Steps)
                 {
                     await ctx.ApplyScene(new RealmScene(step.SceneName, step.TimeFactor));
+                    if (step.BuildsWorld)
+                    {
+                        RealmPonderPumpkinLayouts.Apply(ctx.Realm, step.SceneName);
+                    }
+
                     stepStarted?.Invoke(step);
                     if (step.WaitGameTimeSeconds > 0.0)
                     {

@@ -62,13 +62,16 @@
 		<Compile Include="Diagnostics\RealmM2Diagnostics.cs" />
 		<Compile Include="Diagnostics\RealmM3Diagnostics.cs" />
 		<Compile Include="Diagnostics\RealmPonderDiagnostics.cs" />
+		<Compile Include="Presets\Ponder\RealmPonderBlockPresenter.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderDialog.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderPlayer.cs" />
+		<Compile Include="Presets\Ponder\RealmPonderPumpkinLayouts.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderSamples.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderStep.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderTutorial.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderVisuals.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderWidget.cs" />
+		<Compile Include="Presets\Ponder\Sandbox\PonderSubsystemTerrain.cs" />
 		<Compile Include="Subsystems\SandboxSubsystemPlayers.cs" />
 		<Compile Include="Subsystems\SandboxSubsystemTime.cs" />
 		<Compile Include="Properties\AssemblyInfo.cs" />
@@ -78,6 +81,15 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="Assets\RealmEX\SandboxTerrainProjectTemplate.xdb">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Assets\RealmEX\PonderSandboxProjectTemplate.xdb">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Assets\Shaders\RealmPonderBlocks.vsh">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Assets\Shaders\RealmPonderBlocks.psh">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="modinfo.json">

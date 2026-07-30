@@ -40,7 +40,8 @@ namespace RealmEX.Core
         public static SandboxRealm CreateRealm(
             string realmId,
             RealmProfile profile = null,
-            ValuesDictionary overrides = null)
+            ValuesDictionary overrides = null,
+            string projectTemplateName = null)
         {
             Initialize();
             string normalizedId = NormalizeRealmId(realmId);
@@ -49,7 +50,9 @@ namespace RealmEX.Core
                 throw new InvalidOperationException($"Realm \"{normalizedId}\" already exists.");
             }
 
-            SandboxProject sandbox = RealmBootstrap.Create(normalizedId, overrides);
+            SandboxProject sandbox = string.IsNullOrWhiteSpace(projectTemplateName)
+                ? RealmBootstrap.Create(normalizedId, overrides)
+                : RealmBootstrap.Create(normalizedId, projectTemplateName, overrides);
             RealmProfile realmProfile = profile ?? new RealmProfile();
             realmProfile.RealmId = normalizedId;
             SandboxRealm realm = new(sandbox, realmProfile);

@@ -11,10 +11,11 @@ namespace RealmEX.Presets.Ponder
     {
         private static readonly Color[] StepClearColors =
         [
-            new Color(24, 36, 56),
-            new Color(28, 48, 40),
-            new Color(56, 32, 32),
-            new Color(40, 32, 56)
+            new Color(110, 160, 210),
+            new Color(100, 155, 205),
+            new Color(120, 170, 215),
+            new Color(95, 150, 200),
+            new Color(85, 140, 195)
         ];
 
         public static void ApplyStep(SandboxRealm realm, RealmPonderStep step, int stepIndex, float orbitRadians = 0f)
@@ -24,12 +25,12 @@ namespace RealmEX.Presets.Ponder
 
             int colorIndex = Math.Abs(stepIndex) % StepClearColors.Length;
             realm.Viewport.ClearColor = StepClearColors[colorIndex];
-            realm.Viewport.OrthographicWorldHeight = 14f + (stepIndex % 3);
+            realm.Viewport.OrthographicWorldHeight = 11f;
 
-            float baseAngle = stepIndex * 0.55f + orbitRadians;
-            float radius = 10f;
-            float height = 8f + (stepIndex % 2);
-            Vector3 target = new(8.5f, 2f, 8.5f);
+            float baseAngle = MathUtils.DegToRad(35f) + stepIndex * 0.35f + orbitRadians * 0.25f;
+            float radius = 11f;
+            float height = 7.5f;
+            Vector3 target = new(8.5f, 1.6f, 8.5f);
             realm.Viewport.LookTarget = target;
             realm.Viewport.LookPosition = new Vector3(
                 target.X + MathF.Sin(baseAngle) * radius,

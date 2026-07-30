@@ -31,6 +31,11 @@ namespace RealmEX.Core.Rendering
 
         public float OrthographicWorldHeight { get; set; } = 16f;
 
+        /// <summary>
+        /// Soft-freeze additive：预设可在离屏 RT 内追加绘制（如真实方块网格）。
+        /// </summary>
+        public Action<SandboxRealm, Camera> AfterDraw { get; set; }
+
         public Texture2D Texture => m_renderTarget;
 
         public Point2? RenderTargetSize =>
@@ -66,6 +71,7 @@ namespace RealmEX.Core.Rendering
                 Display.RenderTarget = m_renderTarget;
                 Display.Clear(ClearColor, 1f, 0);
                 realm.SubsystemDrawing.Draw(Camera);
+                AfterDraw?.Invoke(realm, Camera);
             }
             finally
             {

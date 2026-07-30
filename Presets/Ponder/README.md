@@ -10,8 +10,9 @@ Ponder 预设用于教程、演示、镜头脚本、标注和配置化场景展�
 - `RealmPonderStep`：场景名、时间倍率、说明文字、等待秒数。
 - `RealmPonderPlayer`：把教程步骤转换成 Realm 自驱动 async `RealmStoryboard`。
 - `RealmPonderSamples.CreateNotGateTutorial()`：内置非门真值表示例。
-- `RealmPonderDialog` / `RealmPonderVisuals`：玩家可见页面、caption、步骤进度、镜头与清屏色动画。
+- `RealmPonderDialog` / `RealmPonderVisuals`：玩家可见页面、caption、步骤进度、镜头动画。
+- `RealmPonderPumpkinLayouts` / `RealmPonderBlockPresenter`：把泥土、耕地、南瓜生长阶段、南瓜灯写入沙箱 Terrain，并生成真实方块网格。
 
-非门示例目前用于验证 Ponder 配置 / Storyboard / 可见 UI 闭环，只展示「输入与输出相反」的教程逻辑；它不加载完整电路系统，也不声明真实电路仿真已经接入。当前 Minimal 沙箱视口以清屏色与镜头运动表达可见动画；真实方块布局后续补。
+F6 默认播放南瓜教程（Create 式分步）：田地 → 瓜苗 → 生长 → 成熟 → 南瓜灯。方块数据在 `RealmEXPonderProject` 沙箱内，不泄漏到主世界。
 
 游戏内按 **F6** 打开可见 `[RealmEX/Ponder]` Dialog。

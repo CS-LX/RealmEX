@@ -23,6 +23,7 @@ namespace RealmEX.Presets.Ponder
         private readonly BevelledButtonWidget m_closeButton;
 
         private SandboxRealm m_realm;
+        private RealmPonderBlockPresenter m_blockPresenter;
         private RealmPonderStep m_currentStep;
         private int m_currentStepIndex = -1;
         private float m_orbitRadians;
@@ -181,8 +182,12 @@ namespace RealmEX.Presets.Ponder
 
         private void StartPlayback()
         {
-            m_realm = RealmHost.CreateRealm(m_realmId);
+            m_realm = RealmHost.CreateRealm(
+                m_realmId,
+                projectTemplateName: RealmBootstrap.PonderProjectTemplateName);
             m_realm.Viewport.IsEnabled = true;
+            m_blockPresenter = new RealmPonderBlockPresenter();
+            m_blockPresenter.Attach(m_realm);
             m_viewportWidget.Setup(m_realm);
             m_realm.Storyboard = RealmPonderPlayer.CreateStoryboard(
                 m_tutorial,
@@ -197,6 +202,7 @@ namespace RealmEX.Presets.Ponder
             m_currentStep = step;
             m_currentStepIndex++;
             RealmPonderVisuals.ApplyStep(m_realm, step, m_currentStepIndex, m_orbitRadians);
+            m_blockPresenter?.Invalidate();
             RefreshLabels();
             Engine.Log.Information(
                 $"[RealmEX/Ponder] STEP index={m_currentStepIndex + 1} scene={step.SceneName} caption=\"{step.Caption}\"");
@@ -215,6 +221,8 @@ namespace RealmEX.Presets.Ponder
         {
             try
             {
+                m_blockPresenter?.Dispose();
+                m_blockPresenter = null;
                 if (m_realm != null)
                 {
                     RealmHost.DestroyRealm(m_realmId);

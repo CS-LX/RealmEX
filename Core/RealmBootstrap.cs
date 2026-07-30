@@ -12,10 +12,24 @@ namespace RealmEX.Core
     {
         public const string SandboxProjectTemplateName = "RealmEXSandboxProject";
 
+        public const string PonderProjectTemplateName = "RealmEXPonderProject";
+
         public static SandboxProject Create(string realmId, ValuesDictionary overrides = null)
         {
+            return Create(realmId, SandboxProjectTemplateName, overrides);
+        }
+
+        public static SandboxProject Create(
+            string realmId,
+            string projectTemplateName,
+            ValuesDictionary overrides = null)
+        {
             Project mainProject = GameManager.Project;
-            SandboxProject sandbox = Create(DatabaseManager.GameDatabase, realmId, overrides);
+            SandboxProject sandbox = Create(
+                DatabaseManager.GameDatabase,
+                realmId,
+                projectTemplateName,
+                overrides);
             if (!ReferenceEquals(GameManager.Project, mainProject))
             {
                 sandbox.Dispose();
@@ -29,14 +43,27 @@ namespace RealmEX.Core
             string realmId,
             ValuesDictionary overrides = null)
         {
+            return Create(gameDatabase, realmId, SandboxProjectTemplateName, overrides);
+        }
+
+        public static SandboxProject Create(
+            GameDatabase gameDatabase,
+            string realmId,
+            string projectTemplateName,
+            ValuesDictionary overrides = null)
+        {
             ArgumentNullException.ThrowIfNull(gameDatabase);
             if (string.IsNullOrWhiteSpace(realmId))
             {
                 throw new ArgumentException("Realm id cannot be empty.", nameof(realmId));
             }
+            if (string.IsNullOrWhiteSpace(projectTemplateName))
+            {
+                throw new ArgumentException("Project template name cannot be empty.", nameof(projectTemplateName));
+            }
 
             DatabaseObject projectTemplate = gameDatabase.Database.FindDatabaseObject(
-                SandboxProjectTemplateName,
+                projectTemplateName.Trim(),
                 gameDatabase.ProjectTemplateType,
                 true);
             ProjectData projectData = new(gameDatabase, projectTemplate, overrides);
