@@ -3,7 +3,7 @@ using Game;
 using GameEntitySystem;
 using TemplatesDatabase;
 
-namespace RealmEX
+namespace RealmEX.Core
 {
     /// <summary>
     /// 从 RealmEX 专用模板创建内存沙箱，不接管 GameManager 的主世界引用。

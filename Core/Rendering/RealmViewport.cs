@@ -1,6 +1,6 @@
 using System;
 
-namespace RealmEX
+namespace RealmEX.Core.Rendering
 {
     /// <summary>
     /// Realm 离屏渲染占位外壳。真实 RenderTarget / Camera 接入留给 P3 渲染子阶段。

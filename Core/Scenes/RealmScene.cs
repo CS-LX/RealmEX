@@ -1,7 +1,8 @@
 using System;
 using Game;
+using RealmEX.Core;
 
-namespace RealmEX
+namespace RealmEX.Core.Scenes
 {
     /// <summary>
     /// 可替换的 Realm 场景数据。P3 核心先验证切换场景无需改 Host/Bootstrap。

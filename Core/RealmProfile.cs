@@ -1,4 +1,4 @@
-namespace RealmEX
+namespace RealmEX.Core
 {
     /// <summary>
     /// Realm 运行策略。P3 先承载场景名与时间倍率，后续扩展 tick 预算与持久化策略。

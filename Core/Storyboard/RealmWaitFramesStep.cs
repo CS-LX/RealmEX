@@ -1,6 +1,6 @@
 using System;
 
-namespace RealmEX
+namespace RealmEX.Core.Storyboard
 {
     public sealed class RealmWaitFramesStep : IRealmStoryboardStep
     {

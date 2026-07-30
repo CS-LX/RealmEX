@@ -1,7 +1,10 @@
 using System;
 using Game;
+using RealmEX.Core.Rendering;
+using RealmEX.Core.Scenes;
+using RealmEX.Core.Storyboard;
 
-namespace RealmEX
+namespace RealmEX.Core
 {
     /// <summary>
     /// 单个 Realm 的生命周期容器：Project + Profile + Storyboard + Viewport。

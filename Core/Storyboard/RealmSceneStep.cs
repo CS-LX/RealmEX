@@ -1,4 +1,6 @@
-namespace RealmEX
+using RealmEX.Core.Scenes;
+
+namespace RealmEX.Core.Storyboard
 {
     public sealed class RealmSceneStep : IRealmStoryboardStep
     {

@@ -4,7 +4,7 @@ using System.Linq;
 using Game;
 using TemplatesDatabase;
 
-namespace RealmEX
+namespace RealmEX.Core
 {
     /// <summary>
     /// 全局 Realm 调度入口。P2 将在此接入 SandboxRealm 生命周期与并行 tick。

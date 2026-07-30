@@ -1,8 +1,11 @@
 using System;
 using Game;
 using GameEntitySystem;
+using RealmEX.Core;
+using RealmEX.Core.Scenes;
+using RealmEX.Core.Storyboard;
 
-namespace RealmEX
+namespace RealmEX.Diagnostics
 {
     /// <summary>
     /// P3 自定义场景诊断。按 F10 后通过 Storyboard 切换两个 RealmScene 并比较时间倍率。

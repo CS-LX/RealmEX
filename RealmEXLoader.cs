@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Engine.Input;
 using Game;
 using GameEntitySystem;
+using RealmEX.Core;
+using RealmEX.Diagnostics;
 
 namespace RealmEX
 {

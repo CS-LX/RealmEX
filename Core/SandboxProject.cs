@@ -6,7 +6,7 @@ using Engine.Serialization;
 using GameEntitySystem;
 using TemplatesDatabase;
 
-namespace RealmEX
+namespace RealmEX.Core
 {
     /// <summary>
     /// 与主世界隔离的 Realm 工程。P1 仅支持内存态，不参与宿主存档流程。

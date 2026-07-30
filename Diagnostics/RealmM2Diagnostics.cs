@@ -2,8 +2,9 @@ using System;
 using System.Linq;
 using Game;
 using GameEntitySystem;
+using RealmEX.Core;
 
-namespace RealmEX
+namespace RealmEX.Diagnostics
 {
     /// <summary>
     /// P2 并行 tick 的游戏内诊断入口。按 F9 后跨数帧检查主世界与沙箱同时推进。

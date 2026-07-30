@@ -40,20 +40,20 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<Compile Include="RealmEXLoader.cs" />
-		<Compile Include="RealmHost.cs" />
-		<Compile Include="RealmBootstrap.cs" />
-		<Compile Include="RealmM1Diagnostics.cs" />
-		<Compile Include="RealmM2Diagnostics.cs" />
-		<Compile Include="RealmM3Diagnostics.cs" />
-		<Compile Include="RealmProfile.cs" />
-		<Compile Include="RealmScene.cs" />
-		<Compile Include="RealmViewport.cs" />
-		<Compile Include="SandboxRealm.cs" />
-		<Compile Include="SandboxProject.cs" />
-		<Compile Include="Storyboard\IRealmStoryboardStep.cs" />
-		<Compile Include="Storyboard\RealmSceneStep.cs" />
-		<Compile Include="Storyboard\RealmStoryboard.cs" />
-		<Compile Include="Storyboard\RealmWaitFramesStep.cs" />
+		<Compile Include="Core\RealmBootstrap.cs" />
+		<Compile Include="Core\RealmHost.cs" />
+		<Compile Include="Core\RealmProfile.cs" />
+		<Compile Include="Core\SandboxProject.cs" />
+		<Compile Include="Core\SandboxRealm.cs" />
+		<Compile Include="Core\Rendering\RealmViewport.cs" />
+		<Compile Include="Core\Scenes\RealmScene.cs" />
+		<Compile Include="Core\Storyboard\IRealmStoryboardStep.cs" />
+		<Compile Include="Core\Storyboard\RealmSceneStep.cs" />
+		<Compile Include="Core\Storyboard\RealmStoryboard.cs" />
+		<Compile Include="Core\Storyboard\RealmWaitFramesStep.cs" />
+		<Compile Include="Diagnostics\RealmM1Diagnostics.cs" />
+		<Compile Include="Diagnostics\RealmM2Diagnostics.cs" />
+		<Compile Include="Diagnostics\RealmM3Diagnostics.cs" />
 		<Compile Include="Subsystems\SandboxSubsystemPlayers.cs" />
 		<Compile Include="Subsystems\SandboxSubsystemTime.cs" />
 		<Compile Include="Properties\AssemblyInfo.cs" />

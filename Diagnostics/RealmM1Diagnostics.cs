@@ -1,9 +1,10 @@
 using System;
 using Game;
 using GameEntitySystem;
+using RealmEX.Core;
 using RealmEX.Subsystems;
 
-namespace RealmEX
+namespace RealmEX.Diagnostics
 {
     /// <summary>
     /// P1 核心隔离的游戏内诊断入口。完整 Terrain / 设备级 M1 另行验收。

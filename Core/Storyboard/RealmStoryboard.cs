@@ -1,6 +1,7 @@
 using System.Collections.Generic;
+using RealmEX.Core.Scenes;
 
-namespace RealmEX
+namespace RealmEX.Core.Storyboard
 {
     public sealed class RealmStoryboard
     {

@@ -1,4 +1,4 @@
-namespace RealmEX
+namespace RealmEX.Core.Storyboard
 {
     public interface IRealmStoryboardStep
     {
