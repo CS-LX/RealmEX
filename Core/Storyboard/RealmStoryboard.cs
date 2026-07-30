@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System;
+using System.Threading.Tasks;
 using RealmEX.Core.Scenes;
 
 namespace RealmEX.Core.Storyboard
@@ -23,6 +25,11 @@ namespace RealmEX.Core.Storyboard
         public void EnqueueWaitFrames(int frames)
         {
             Enqueue(new RealmWaitFramesStep(frames));
+        }
+
+        public void EnqueueAsync(Func<RealmStoryboardContext, Task> script)
+        {
+            Enqueue(new RealmAsyncStoryboardStep(script));
         }
 
         public void Update(SandboxRealm realm)

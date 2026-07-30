@@ -49,10 +49,13 @@ namespace RealmEX.Diagnostics
                 m_previousSandboxTime = m_sandboxTime.GameTime;
 
                 RealmStoryboard storyboard = new();
-                storyboard.EnqueueScene(new RealmScene("m3-slow", 0.5f));
-                storyboard.EnqueueWaitFrames(3);
-                storyboard.EnqueueScene(new RealmScene("m3-fast", 2f));
-                storyboard.EnqueueWaitFrames(3);
+                storyboard.EnqueueAsync(async ctx =>
+                {
+                    await ctx.ApplyScene(new RealmScene("m3-slow", 0.5f));
+                    await ctx.WaitFrames(3);
+                    await ctx.ApplyScene(new RealmScene("m3-fast", 2f));
+                    await ctx.WaitFrames(3);
+                });
                 m_realm.Storyboard = storyboard;
 
                 m_frames = 0;

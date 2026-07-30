@@ -48,6 +48,10 @@
 		<Compile Include="Core\Rendering\RealmCamera.cs" />
 		<Compile Include="Core\Rendering\RealmViewport.cs" />
 		<Compile Include="Core\Scenes\RealmScene.cs" />
+		<Compile Include="Core\Storyboard\RealmAsyncStoryboardStep.cs" />
+		<Compile Include="Core\Storyboard\RealmStoryboardAwaitable.cs" />
+		<Compile Include="Core\Storyboard\RealmStoryboardAwaitOperation.cs" />
+		<Compile Include="Core\Storyboard\RealmStoryboardContext.cs" />
 		<Compile Include="Core\Storyboard\IRealmStoryboardStep.cs" />
 		<Compile Include="Core\Storyboard\RealmSceneStep.cs" />
 		<Compile Include="Core\Storyboard\RealmStoryboard.cs" />

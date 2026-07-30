@@ -16,7 +16,7 @@
 
 ## 当前进度
 
-P1 / P2 / P3a 核心已完成：`SandboxProject`、`RealmHost.TickParallel`、`SandboxRealm`、`RealmScene` 与 `RealmStoryboard` 已通过 F8 / F9 / F10 游戏内诊断。P3b 已完成模块边界归类，核心运行时位于 `Core`，诊断位于 `Diagnostics`，并预留 `Presets.Ponder` / `Presets.Create`。P3c 已落地 `RealmViewport` 离屏渲染核心与基础 `RealmPonderWidget`；M1T 已通过 F7 BlockEntity 注册与 Terrain cell 变更隔离游戏内诊断；Ponder 配置协议、可选持久化与内容模组扩展入口仍在后续阶段。
+P1 / P2 / P3a 核心已完成：`SandboxProject`、`RealmHost.TickParallel`、`SandboxRealm`、`RealmScene` 与 `RealmStoryboard` 已通过 F8 / F9 / F10 游戏内诊断。P3b 已完成模块边界归类，核心运行时位于 `Core`，诊断位于 `Diagnostics`，并预留 `Presets.Ponder` / `Presets.Create`。P3c 已落地 `RealmViewport` 离屏渲染核心与基础 `RealmPonderWidget`；M1T 已通过 F7 BlockEntity 注册与 Terrain cell 变更隔离游戏内诊断；P3d-async 已通过 F10 async Storyboard 诊断；Ponder 配置协议、可选持久化与内容模组扩展入口仍在后续阶段。
 
 ## 文档
 
@@ -102,7 +102,7 @@ M1T-3 起通过时会输出：
 [RealmEX/M3] RESULT=PASS scope=P3Scene
 ```
 
-该入口会创建一个短生命周期 `SandboxRealm`，通过 `RealmStoryboard` 依次应用 `m3-slow` 与 `m3-fast` 两个 `RealmScene`，验证换场景会改变沙箱时间倍率而不需要改 Host / Bootstrap。P3c 起，该入口也会做一次 256×256 离屏渲染，并检查 `viewport-texture-created` 与 `viewport-rendered`。
+该入口会创建一个短生命周期 `SandboxRealm`，通过 `RealmStoryboard` 依次应用 `m3-slow` 与 `m3-fast` 两个 `RealmScene`，验证换场景会改变沙箱时间倍率而不需要改 Host / Bootstrap。P3c 起，该入口也会做一次 256×256 离屏渲染，并检查 `viewport-texture-created` 与 `viewport-rendered`。P3d-async 起，M3 诊断使用 `await ctx.ApplyScene(...)` / `await ctx.WaitFrames(...)` 脚本语法驱动同一流程。
 
 ## 内容模组接入（规划）
 
