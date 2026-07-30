@@ -36,9 +36,14 @@ namespace RealmEX
             }
 
             RealmHost.TickParallel(dt);
+            RealmPonderDiagnostics.Update(subsystemUpdate);
             RealmM2Diagnostics.Update(subsystemUpdate);
             RealmM3Diagnostics.Update(subsystemUpdate);
 
+            if (Keyboard.IsKeyDownOnce(Key.F6))
+            {
+                RealmPonderDiagnostics.Start();
+            }
             if (Keyboard.IsKeyDownOnce(Key.F7))
             {
                 RealmM1TDiagnostics.Run();
@@ -59,6 +64,7 @@ namespace RealmEX
 
         public override void OnProjectLoaded(Project project)
         {
+            Engine.Log.Information("[RealmEX/Ponder] READY tutorial=not-gate action=PressF6");
             Engine.Log.Information("[RealmEX/M1T] READY scope=TerrainIsolation action=PressF7");
             Engine.Log.Information("[RealmEX/M1] READY scope=P1Core action=PressF8");
             Engine.Log.Information("[RealmEX/M2] READY scope=P2Tick action=PressF9");
@@ -68,6 +74,7 @@ namespace RealmEX
 
         public override void OnProjectDisposed()
         {
+            RealmPonderDiagnostics.Cancel();
             RealmM2Diagnostics.Cancel();
             RealmM3Diagnostics.Cancel();
             RealmHost.DisposeAll();

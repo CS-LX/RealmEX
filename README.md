@@ -16,7 +16,7 @@
 
 ## 当前进度
 
-P1 / P2 / P3a 核心已完成：`SandboxProject`、`RealmHost.TickParallel`、`SandboxRealm`、`RealmScene` 与 `RealmStoryboard` 已通过 F8 / F9 / F10 游戏内诊断。P3b 已完成模块边界归类，核心运行时位于 `Core`，诊断位于 `Diagnostics`，并预留 `Presets.Ponder` / `Presets.Create`。P3c 已落地 `RealmViewport` 离屏渲染核心与基础 `RealmPonderWidget`；M1T 已通过 F7 BlockEntity 注册与 Terrain cell 变更隔离游戏内诊断；P3d-async 已通过 F10 async Storyboard 诊断；Ponder 配置协议、可选持久化与内容模组扩展入口仍在后续阶段。
+P1 / P2 / P3a 核心已完成：`SandboxProject`、`RealmHost.TickParallel`、`SandboxRealm`、`RealmScene` 与 `RealmStoryboard` 已通过 F8 / F9 / F10 游戏内诊断。P3b 已完成模块边界归类，核心运行时位于 `Core`，诊断位于 `Diagnostics`，并预留 `Presets.Ponder` / `Presets.Create`。P3c 已落地 `RealmViewport` 离屏渲染核心与基础 `RealmPonderWidget`；M1T 已通过 F7 BlockEntity 注册与 Terrain cell 变更隔离游戏内诊断；P3d-async 已通过 F10 async Storyboard 诊断；P3d 已新增 F6 非门 Ponder 示例教程诊断；可选持久化与内容模组扩展入口仍在后续阶段。
 
 ## 文档
 
@@ -93,7 +93,7 @@ M1T-3 起通过时会输出：
 
 1. 构建并部署 RealmEX，启动游戏后进入任意主世界。
 2. 日志出现 `[RealmEX/M3] READY` 后按一次 **F10**。
-3. 等待约 2 秒后正常退出世界。
+3. 等待约 5 秒后正常退出世界。
 4. 检查 Mods 目录上一级的 `Game.log`，若不存在则查 `Bugs/Game.log`，搜索 `[RealmEX/M3]`。
 
 通过时会输出：
@@ -103,6 +103,21 @@ M1T-3 起通过时会输出：
 ```
 
 该入口会创建一个短生命周期 `SandboxRealm`，通过 `RealmStoryboard` 依次应用 `m3-slow` 与 `m3-fast` 两个 `RealmScene`，验证换场景会改变沙箱时间倍率而不需要改 Host / Bootstrap。P3c 起，该入口也会做一次 256×256 离屏渲染，并检查 `viewport-texture-created` 与 `viewport-rendered`。P3d-async 起，M3 诊断使用 `await ctx.ApplyScene(...)` / `await ctx.WaitFrames(...)` 脚本语法驱动同一流程。
+
+## P3d Ponder 示例教程入口
+
+1. 构建并部署 RealmEX，启动游戏后进入任意主世界。
+2. 日志出现 `[RealmEX/Ponder] READY` 后按一次 **F6**。
+3. 等待约 2 秒后正常退出世界。
+4. 检查 Mods 目录上一级的 `Game.log`，若不存在则查 `Bugs/Game.log`，搜索 `[RealmEX/Ponder]`。
+
+通过时会输出：
+
+```text
+[RealmEX/Ponder] RESULT=PASS tutorial=not-gate
+```
+
+该入口运行内置非门真值表示例，验证 Ponder 教程数据、async Storyboard、说明步骤日志和 Realm 视口闭环。它不代表完整电路系统已接入。
 
 ## 内容模组接入（规划）
 
