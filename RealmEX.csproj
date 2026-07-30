@@ -53,6 +53,8 @@
 		<Compile Include="Core\Storyboard\RealmStoryboard.cs" />
 		<Compile Include="Core\Storyboard\RealmWaitFramesStep.cs" />
 		<Compile Include="Diagnostics\RealmM1Diagnostics.cs" />
+		<Compile Include="Diagnostics\RealmM1TDiagnosticSubsystems.cs" />
+		<Compile Include="Diagnostics\RealmM1TDiagnostics.cs" />
 		<Compile Include="Diagnostics\RealmM2Diagnostics.cs" />
 		<Compile Include="Diagnostics\RealmM3Diagnostics.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderWidget.cs" />
@@ -62,6 +64,9 @@
 	</ItemGroup>
 	<ItemGroup>
 		<None Update="Assets\RealmEX\SandboxProjectTemplate.xdb">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Assets\RealmEX\SandboxTerrainProjectTemplate.xdb">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="modinfo.json">

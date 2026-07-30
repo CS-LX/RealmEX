@@ -39,6 +39,10 @@ namespace RealmEX
             RealmM2Diagnostics.Update(subsystemUpdate);
             RealmM3Diagnostics.Update(subsystemUpdate);
 
+            if (Keyboard.IsKeyDownOnce(Key.F7))
+            {
+                RealmM1TDiagnostics.Run();
+            }
             if (Keyboard.IsKeyDownOnce(Key.F8))
             {
                 RealmM1Diagnostics.Run();
@@ -55,6 +59,7 @@ namespace RealmEX
 
         public override void OnProjectLoaded(Project project)
         {
+            Engine.Log.Information("[RealmEX/M1T] READY scope=TerrainIsolation action=PressF7");
             Engine.Log.Information("[RealmEX/M1] READY scope=P1Core action=PressF8");
             Engine.Log.Information("[RealmEX/M2] READY scope=P2Tick action=PressF9");
             Engine.Log.Information("[RealmEX/M3] READY scope=P3Scene action=PressF10");

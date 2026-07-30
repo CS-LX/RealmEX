@@ -1,0 +1,30 @@
+<RealmEX>
+	<ProjectTemplate Name="RealmEXSandboxTerrainProject" Guid="c6397f37-4d4c-49fd-9940-8c23dd2158e6">
+		<MemberSubsystemTemplate Name="Players" Guid="81b977b1-c58e-451a-9e97-12955d799328" InheritanceParent="30b8559d-fc03-42cb-b716-e985aaac96c0">
+			<Parameter Name="Class" Guid="35713a05-3480-44ba-a418-e76290e30999" Value="RealmEX.Subsystems.SandboxSubsystemPlayers" Type="string" />
+			<Parameter Name="Dependencies" Guid="ae0424ec-e164-47f1-98da-d41c626fd2e5" Value="" Type="string" />
+		</MemberSubsystemTemplate>
+		<MemberSubsystemTemplate Name="Time" Guid="3287ce21-b560-4dd7-b11d-b31594633b18" InheritanceParent="73bbc39a-6cf8-470b-b008-fb9aef611caa">
+			<Parameter Name="Class" Guid="974c8e60-6c89-42c6-88fa-d82b06506040" Value="RealmEX.Subsystems.SandboxSubsystemTime" Type="string" />
+		</MemberSubsystemTemplate>
+		<MemberSubsystemTemplate Name="Update" Guid="e0940a11-c956-4567-9c7b-6d8c7e7ce27c" InheritanceParent="743dceeb-03d9-4d12-9c0a-3e9774a6afe6" />
+		<MemberSubsystemTemplate Name="Drawing" Guid="6c113b60-0791-4910-a84a-cb087e4d6120">
+			<Parameter Name="Class" Guid="1e446759-805b-47c4-ae6d-f4a6f8549c70" Value="Game.SubsystemDrawing" Type="string" />
+		</MemberSubsystemTemplate>
+		<MemberSubsystemTemplate Name="GameInfo" Guid="b6d35f8f-2dbf-4de9-8322-e18d39fb62e7" InheritanceParent="af753bf7-a952-4222-8507-4289c3b7670b">
+			<Parameter Name="Class" Guid="fc7f1e39-e119-4b11-a583-b83098cb3431" Value="RealmEX.Diagnostics.DiagnosticSubsystemGameInfo" Type="string" />
+		</MemberSubsystemTemplate>
+		<MemberSubsystemTemplate Name="Terrain" Guid="d29ff345-b138-4329-8926-e852802d892d" InheritanceParent="99ba8fcf-22cd-4adc-97ab-cb7b326ec037">
+			<Parameter Name="Class" Guid="3f5aca07-3b2d-4fdf-ab99-e69806fe9bd0" Value="RealmEX.Diagnostics.DiagnosticSubsystemTerrain" Type="string" />
+		</MemberSubsystemTemplate>
+		<MemberSubsystemTemplate Name="Audio" Guid="5843f67c-ad55-45db-b98b-b82ab87159ca" InheritanceParent="1a7dc615-f95f-46b1-916e-4a05d502527d">
+			<Parameter Name="Class" Guid="0d95373a-8274-47f6-a812-e682046da55c" Value="RealmEX.Diagnostics.DiagnosticSubsystemAudio" Type="string" />
+		</MemberSubsystemTemplate>
+		<MemberSubsystemTemplate Name="MovingBlocks" Guid="e03444be-c964-4be1-a20b-8f1d2c9102bd" InheritanceParent="bb01254d-4991-4135-96f2-50ad9262a28e">
+			<Parameter Name="Class" Guid="fc63995e-f662-4367-906a-d44764878770" Value="RealmEX.Diagnostics.DiagnosticSubsystemMovingBlocks" Type="string" />
+		</MemberSubsystemTemplate>
+		<MemberSubsystemTemplate Name="BlockEntities" Guid="116e3af2-75df-45fe-ba1e-43d0d6c03938" InheritanceParent="ccd8d745-1802-4dc7-80ed-8e01712fe611" />
+		<MemberSubsystemTemplate Name="EntityBlockBehavior" Guid="f4a596bb-3d6c-4750-a317-80b97b517f3f" InheritanceParent="3adb82ac-b42c-485d-b393-4b017aba88d0" />
+		<MemberSubsystemTemplate Name="ChestBehavior" Guid="2c1bd798-6de6-40ee-b584-3f4097d4f379" InheritanceParent="8723c7b1-fe0c-4003-b41b-db3f4d46ac03" />
+	</ProjectTemplate>
+</RealmEX>

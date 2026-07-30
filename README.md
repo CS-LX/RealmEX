@@ -16,7 +16,7 @@
 
 ## 当前进度
 
-P1 / P2 / P3a 核心已完成：`SandboxProject`、`RealmHost.TickParallel`、`SandboxRealm`、`RealmScene` 与 `RealmStoryboard` 已通过 F8 / F9 / F10 游戏内诊断。P3b 已完成模块边界归类，核心运行时位于 `Core`，诊断位于 `Diagnostics`，并预留 `Presets.Ponder` / `Presets.Create`。P3c 已落地 `RealmViewport` 离屏渲染核心与基础 `RealmPonderWidget`；设备级 M1、Ponder 配置协议、可选持久化与内容模组扩展入口仍在后续阶段。
+P1 / P2 / P3a 核心已完成：`SandboxProject`、`RealmHost.TickParallel`、`SandboxRealm`、`RealmScene` 与 `RealmStoryboard` 已通过 F8 / F9 / F10 游戏内诊断。P3b 已完成模块边界归类，核心运行时位于 `Core`，诊断位于 `Diagnostics`，并预留 `Presets.Ponder` / `Presets.Create`。P3c 已落地 `RealmViewport` 离屏渲染核心与基础 `RealmPonderWidget`；M1T 已通过 F7 BlockEntity 注册隔离游戏内诊断；Ponder 配置协议、可选持久化与内容模组扩展入口仍在后续阶段。
 
 ## 文档
 
@@ -52,6 +52,21 @@ dotnet build RealmEX.csproj -c Release -p:RealmEXSkipPack=true
 ```
 
 `deviceTerrain=NOT_TESTED` 表示本入口只验证独立 Project、Players / Time / Update、Save 护栏和 Host 生命周期；含 Terrain / BlockEntity 的设备级 M1 仍需后续入口。
+
+## M1T Terrain / BlockEntity 隔离入口
+
+1. 构建并部署 RealmEX，启动游戏后进入任意主世界。
+2. 日志出现 `[RealmEX/M1T] READY` 后按一次 **F7**。
+3. 等待数秒后正常退出世界。
+4. 检查 Mods 目录上一级的 `Game.log`，若不存在则查 `Bugs/Game.log`，搜索 `[RealmEX/M1T]`。
+
+通过时会输出：
+
+```text
+[RealmEX/M1T] RESULT=PASS scope=TerrainIsolation validation=BlockEntityRegistry terrainMode=diagnostic-stub
+```
+
+该入口使用独立 `RealmEXSandboxTerrainProject` 模板与诊断专用 stub Terrain，当前只验收原版 `Chest` 的 `ComponentBlockEntity` 是否注册到沙箱自己的 `SubsystemBlockEntities`，并确认主世界同坐标注册表不变。完整 Terrain 方块变更隔离仍属于后续 M1T-3。
 
 ## P2 并行 Tick 测试入口
 
