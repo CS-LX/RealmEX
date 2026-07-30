@@ -15,6 +15,7 @@ namespace RealmEX.Diagnostics
         private const string TestRealmId = "realmex-m1t-terrain";
         private const string TerrainTemplateName = "RealmEXSandboxTerrainProject";
         private static readonly Point3 ChestCoordinates = new(30999, 128, 30999);
+        private static readonly Point3 TerrainCellCoordinates = new(1, 64, 1);
 
         public static void Run()
         {
@@ -40,9 +41,14 @@ namespace RealmEX.Diagnostics
                     sandbox.FindSubsystem<SubsystemBlockEntities>(true);
                 SubsystemBlockEntities mainBlockEntities =
                     mainProject.FindSubsystem<SubsystemBlockEntities>(true);
+                SubsystemTerrain sandboxTerrain =
+                    sandbox.FindSubsystem<SubsystemTerrain>(true);
+                SubsystemTerrain mainTerrain =
+                    mainProject.FindSubsystem<SubsystemTerrain>(true);
                 SubsystemChestBlockBehavior chestBehavior =
                     sandbox.FindSubsystem<SubsystemChestBlockBehavior>(true);
                 Check(!ReferenceEquals(sandboxBlockEntities, mainBlockEntities), "block-entity-registry-isolated");
+                Check(!ReferenceEquals(sandboxTerrain, mainTerrain), "terrain-subsystem-isolated");
 
                 ComponentBlockEntity mainBefore = mainBlockEntities.GetBlockEntity(ChestCoordinates);
 
@@ -59,13 +65,39 @@ namespace RealmEX.Diagnostics
                     ReferenceEquals(mainBlockEntities.GetBlockEntity(ChestCoordinates), mainBefore),
                     "main-world-block-entity-unchanged");
 
+                stage = "change-cell";
+                int mainCellBefore = mainTerrain.Terrain.GetCellValue(TerrainCellCoordinates);
+                ComponentBlockEntity mainCellBlockEntityBefore =
+                    mainBlockEntities.GetBlockEntity(TerrainCellCoordinates);
+                sandboxTerrain.ChangeCell(
+                    TerrainCellCoordinates.X,
+                    TerrainCellCoordinates.Y,
+                    TerrainCellCoordinates.Z,
+                    chestValue);
+                Check(
+                    sandboxTerrain.Terrain.GetCellValue(TerrainCellCoordinates) == chestValue,
+                    "sandbox-terrain-cell-changed");
+                Check(
+                    mainTerrain.Terrain.GetCellValue(TerrainCellCoordinates) == mainCellBefore,
+                    "main-world-cell-unchanged");
+                Check(
+                    sandboxBlockEntities.GetBlockEntity(TerrainCellCoordinates) != null,
+                    "sandbox-change-cell-created-block-entity");
+                Check(
+                    ReferenceEquals(mainBlockEntities.GetBlockEntity(TerrainCellCoordinates), mainCellBlockEntityBefore),
+                    "main-world-change-cell-block-entity-unchanged");
+
+                stage = "process-neighbors";
+                sandboxTerrain.ProcessModifiedCells();
+                Check(sandboxTerrain.m_modifiedCells.Count == 0, "sandbox-modified-cells-processed");
+
                 stage = "dispose";
                 sandbox.Dispose();
                 sandbox = null;
                 Check(RealmHost.ActiveSandboxes.Count == activeBefore, "host-active-count-restored");
 
                 Engine.Log.Information(
-                    "[RealmEX/M1T] RESULT=PASS scope=TerrainIsolation validation=BlockEntityRegistry terrainMode=diagnostic-stub");
+                    "[RealmEX/M1T] RESULT=PASS scope=TerrainIsolation validation=BlockEntityRegistry,TerrainCellChange terrainMode=diagnostic-stub");
             }
             catch (M1TBlockedException ex)
             {

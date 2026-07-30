@@ -23,6 +23,9 @@
 		<MemberSubsystemTemplate Name="MovingBlocks" Guid="e03444be-c964-4be1-a20b-8f1d2c9102bd" InheritanceParent="bb01254d-4991-4135-96f2-50ad9262a28e">
 			<Parameter Name="Class" Guid="fc63995e-f662-4367-906a-d44764878770" Value="RealmEX.Diagnostics.DiagnosticSubsystemMovingBlocks" Type="string" />
 		</MemberSubsystemTemplate>
+		<MemberSubsystemTemplate Name="BlockBehaviors" Guid="877ce4c6-4d46-4021-909b-77067e863af6" InheritanceParent="ebfc88a1-2c29-441a-8a08-72f44daf0604">
+			<Parameter Name="Class" Guid="79d77640-c96a-4efc-940d-f12447393e1e" Value="RealmEX.Diagnostics.DiagnosticSubsystemBlockBehaviors" Type="string" />
+		</MemberSubsystemTemplate>
 		<MemberSubsystemTemplate Name="BlockEntities" Guid="116e3af2-75df-45fe-ba1e-43d0d6c03938" InheritanceParent="ccd8d745-1802-4dc7-80ed-8e01712fe611" />
 		<MemberSubsystemTemplate Name="EntityBlockBehavior" Guid="f4a596bb-3d6c-4750-a317-80b97b517f3f" InheritanceParent="3adb82ac-b42c-485d-b393-4b017aba88d0" />
 		<MemberSubsystemTemplate Name="ChestBehavior" Guid="2c1bd798-6de6-40ee-b584-3f4097d4f379" InheritanceParent="8723c7b1-fe0c-4003-b41b-db3f4d46ac03" />

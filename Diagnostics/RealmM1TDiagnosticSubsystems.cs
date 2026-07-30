@@ -13,6 +13,12 @@ namespace RealmEX.Diagnostics
         public override void Load(ValuesDictionary valuesDictionary)
         {
             Terrain = new Terrain();
+            Terrain.AllocateChunk(0, 0).State = TerrainChunkState.Valid;
+            TerrainUpdater = new TerrainUpdater
+            {
+                m_terrain = Terrain
+            };
+            m_subsystemBlockBehaviors = Project.FindSubsystem<SubsystemBlockBehaviors>(true);
         }
 
         public override void Dispose()
@@ -49,6 +55,23 @@ namespace RealmEX.Diagnostics
 
         public override void Dispose()
         {
+        }
+    }
+
+    public sealed class DiagnosticSubsystemBlockBehaviors : SubsystemBlockBehaviors
+    {
+        public override void Load(ValuesDictionary valuesDictionary)
+        {
+            m_blockBehaviorsByContents = new SubsystemBlockBehavior[BlocksManager.Blocks.Length][];
+            for (int i = 0; i < m_blockBehaviorsByContents.Length; i++)
+            {
+                m_blockBehaviorsByContents[i] = [];
+            }
+
+            SubsystemChestBlockBehavior chestBehavior =
+                Project.FindSubsystem<SubsystemChestBlockBehavior>(true);
+            m_blockBehaviorsByContents[45] = [chestBehavior];
+            m_blockBehaviors.Add(chestBehavior);
         }
     }
 }

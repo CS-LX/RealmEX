@@ -150,6 +150,13 @@ Terrain 方块变更级待核实成员：
 - 触发必要的修改队列 / 邻居通知。
 - 检查主世界同坐标方块值不变。
 
+当前实现：
+
+- F7 诊断复用 `RealmEXSandboxTerrainProject`。
+- `DiagnosticSubsystemTerrain` 分配一个真实 `TerrainChunk`，通过 `ChangeCell` 写入原版 `Chest` 方块。
+- `DiagnosticSubsystemBlockBehaviors` 只为该验收提供窄化的 `ChestBehavior` 行为表，避免复制完整宿主方块行为体系。
+- 验证沙箱 cell 改变、主世界同坐标 cell 不变、`ChangeCell` 触发的 BlockEntity 只进入沙箱注册表。
+
 通过标准：
 
 - 沙箱 `SubsystemTerrain` 与主世界实例不同。
@@ -177,6 +184,6 @@ Terrain 方块变更级待核实成员：
 M1T-0 / M1T-1 当前结论：
 
 1. 原版验证对象初选 `Chest`。
-2. F7 已先做 BlockEntity 注册隔离级验收，不直接追求完整 Terrain 方块变更。
+2. F7 已通过 BlockEntity 注册隔离和 Terrain cell 变更隔离验收。
 3. `SandboxTerrainProjectTemplate.xdb` 作为独立诊断模板，不接入默认 Minimal。
-4. 下一步是 M1T-3：真实 Terrain 方块变更隔离；若宿主依赖未满足，应输出 `RESULT=BLOCKED`，而不是把模板依赖问题当作隔离失败。
+4. 下一步转入 P3d-async；完整宿主 Terrain / 全量方块行为仍应等待预设模板或 Contributor 机制，不塞进 Core Minimal。

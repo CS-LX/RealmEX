@@ -16,7 +16,7 @@
 
 ## 当前进度
 
-P1 / P2 / P3a 核心已完成：`SandboxProject`、`RealmHost.TickParallel`、`SandboxRealm`、`RealmScene` 与 `RealmStoryboard` 已通过 F8 / F9 / F10 游戏内诊断。P3b 已完成模块边界归类，核心运行时位于 `Core`，诊断位于 `Diagnostics`，并预留 `Presets.Ponder` / `Presets.Create`。P3c 已落地 `RealmViewport` 离屏渲染核心与基础 `RealmPonderWidget`；M1T 已通过 F7 BlockEntity 注册隔离游戏内诊断；Ponder 配置协议、可选持久化与内容模组扩展入口仍在后续阶段。
+P1 / P2 / P3a 核心已完成：`SandboxProject`、`RealmHost.TickParallel`、`SandboxRealm`、`RealmScene` 与 `RealmStoryboard` 已通过 F8 / F9 / F10 游戏内诊断。P3b 已完成模块边界归类，核心运行时位于 `Core`，诊断位于 `Diagnostics`，并预留 `Presets.Ponder` / `Presets.Create`。P3c 已落地 `RealmViewport` 离屏渲染核心与基础 `RealmPonderWidget`；M1T 已通过 F7 BlockEntity 注册与 Terrain cell 变更隔离游戏内诊断；Ponder 配置协议、可选持久化与内容模组扩展入口仍在后续阶段。
 
 ## 文档
 
@@ -66,7 +66,13 @@ dotnet build RealmEX.csproj -c Release -p:RealmEXSkipPack=true
 [RealmEX/M1T] RESULT=PASS scope=TerrainIsolation validation=BlockEntityRegistry terrainMode=diagnostic-stub
 ```
 
-该入口使用独立 `RealmEXSandboxTerrainProject` 模板与诊断专用 stub Terrain，当前只验收原版 `Chest` 的 `ComponentBlockEntity` 是否注册到沙箱自己的 `SubsystemBlockEntities`，并确认主世界同坐标注册表不变。完整 Terrain 方块变更隔离仍属于后续 M1T-3。
+M1T-3 起通过时会输出：
+
+```text
+[RealmEX/M1T] RESULT=PASS scope=TerrainIsolation validation=BlockEntityRegistry,TerrainCellChange terrainMode=diagnostic-stub
+```
+
+该入口使用独立 `RealmEXSandboxTerrainProject` 模板与诊断专用 stub Terrain，验收原版 `Chest` 的 `ComponentBlockEntity` 是否注册到沙箱自己的 `SubsystemBlockEntities`，并通过 `ChangeCell` 验证沙箱 cell 变更不会影响主世界同坐标 cell / BlockEntity 注册表。
 
 ## P2 并行 Tick 测试入口
 
