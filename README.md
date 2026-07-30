@@ -16,16 +16,15 @@
 
 ## 当前进度
 
-P1 已进入实现：`RealmBootstrap` 可从专用 xdb 模板创建内存态 `SandboxProject`，`RealmHost` 负责创建、查重、销毁和主世界退出清理；`SandboxSubsystemPlayers` 允许沙箱在无玩家时运行，且不会切换主世界界面。P1 沙箱不接管 `GameManager.Project`，也不允许进入宿主存档流程。
-
-并行 tick、场景、离屏渲染和持久化仍分别属于 P2–P4；当前模板只包含 P1 启动所需的 Players、Time 与 Update 子系统。核心 Project 隔离已通过游戏内 F8 运行时验证，含 Terrain / 设备注册的完整 M1 尚未完成。
+P1 / P2 / P3a 核心已完成：`SandboxProject`、`RealmHost.TickParallel`、`SandboxRealm`、`RealmScene` 与 `RealmStoryboard` 已通过 F8 / F9 / F10 游戏内诊断。真实离屏渲染、设备级 M1、可选持久化与内容模组扩展入口仍在后续阶段。
 
 ## 文档
 
 | 文档 | 说明 |
 | --- | --- |
 | [docs/README.md](docs/README.md) | 文档索引 |
-| [docs/architecture/目标架构.md](docs/architecture/目标架构.md) | **实施导航**（核心类型、阶段、里程碑） |
+| [docs/architecture/目标架构.md](docs/architecture/目标架构.md) | **目标架构**（核心类型、边界、不变量） |
+| [docs/实施计划.md](docs/实施计划.md) | 阶段计划、Ponder 预设、Create 预设与近期顺序 |
 | [docs/architecture/宿主耦合事实.md](docs/architecture/宿主耦合事实.md) | 宿主 `Project` / Subsystem 耦合摘录 |
 | [docs/architecture/嵌套存档模式事实.md](docs/architecture/嵌套存档模式事实.md) | 子目录持久化对照（非换档运行时） |
 | [docs/RELEASE.md](docs/RELEASE.md) | 发版与 CI |
