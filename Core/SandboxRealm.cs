@@ -1,4 +1,5 @@
 using System;
+using Engine;
 using Game;
 using RealmEX.Core.Rendering;
 using RealmEX.Core.Scenes;
@@ -11,6 +12,9 @@ namespace RealmEX.Core
     /// </summary>
     public sealed class SandboxRealm : IDisposable
     {
+        private SubsystemUpdate m_subsystemUpdate;
+        private SubsystemDrawing m_subsystemDrawing;
+
         public SandboxRealm(SandboxProject project, RealmProfile profile = null)
         {
             Project = project ?? throw new ArgumentNullException(nameof(project));
@@ -33,6 +37,10 @@ namespace RealmEX.Core
 
         public bool IsDisposed => Project.IsDisposed;
 
+        public SubsystemUpdate SubsystemUpdate => m_subsystemUpdate ??= Project.FindSubsystem<SubsystemUpdate>(true);
+
+        public SubsystemDrawing SubsystemDrawing => m_subsystemDrawing ??= Project.FindSubsystem<SubsystemDrawing>(true);
+
         public void ApplyScene(RealmScene scene)
         {
             scene.Apply(this);
@@ -41,12 +49,12 @@ namespace RealmEX.Core
         public void Tick()
         {
             Storyboard?.Update(this);
-            Project.FindSubsystem<SubsystemUpdate>(true).Update();
+            SubsystemUpdate.Update();
         }
 
-        public void Draw()
+        public void Draw(Point2 size)
         {
-            Viewport.DrawIfNeeded();
+            Viewport.DrawIfNeeded(this, size);
         }
 
         public void Dispose()

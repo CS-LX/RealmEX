@@ -45,6 +45,7 @@
 		<Compile Include="Core\RealmProfile.cs" />
 		<Compile Include="Core\SandboxProject.cs" />
 		<Compile Include="Core\SandboxRealm.cs" />
+		<Compile Include="Core\Rendering\RealmCamera.cs" />
 		<Compile Include="Core\Rendering\RealmViewport.cs" />
 		<Compile Include="Core\Scenes\RealmScene.cs" />
 		<Compile Include="Core\Storyboard\IRealmStoryboardStep.cs" />
@@ -54,6 +55,7 @@
 		<Compile Include="Diagnostics\RealmM1Diagnostics.cs" />
 		<Compile Include="Diagnostics\RealmM2Diagnostics.cs" />
 		<Compile Include="Diagnostics\RealmM3Diagnostics.cs" />
+		<Compile Include="Presets\Ponder\RealmPonderWidget.cs" />
 		<Compile Include="Subsystems\SandboxSubsystemPlayers.cs" />
 		<Compile Include="Subsystems\SandboxSubsystemTime.cs" />
 		<Compile Include="Properties\AssemblyInfo.cs" />

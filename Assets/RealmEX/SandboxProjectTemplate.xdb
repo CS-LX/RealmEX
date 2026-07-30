@@ -8,5 +8,8 @@
 			<Parameter Name="Class" Guid="ba8dd81e-ee38-42af-b1bd-131762f825fc" Value="RealmEX.Subsystems.SandboxSubsystemTime" Type="string" />
 		</MemberSubsystemTemplate>
 		<MemberSubsystemTemplate Name="Update" Guid="2c475946-2d06-4609-8379-167ef67399d0" InheritanceParent="743dceeb-03d9-4d12-9c0a-3e9774a6afe6" />
+		<MemberSubsystemTemplate Name="Drawing" Guid="2d6cd821-d76a-47d8-bad7-fd3c615f7e8d">
+			<Parameter Name="Class" Guid="2b611f6c-4a1e-4f63-a060-f6168084a817" Value="Game.SubsystemDrawing" Type="string" />
+		</MemberSubsystemTemplate>
 	</ProjectTemplate>
 </RealmEX>

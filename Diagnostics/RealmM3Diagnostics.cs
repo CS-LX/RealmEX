@@ -1,4 +1,5 @@
 using System;
+using Engine;
 using Game;
 using GameEntitySystem;
 using RealmEX.Core;
@@ -43,6 +44,7 @@ namespace RealmEX.Diagnostics
 
                 stage = "create";
                 m_realm = RealmHost.CreateRealm(TestRealmId);
+                m_realm.Viewport.IsEnabled = true;
                 m_sandboxTime = m_realm.Project.FindSubsystem<SubsystemTime>(true);
                 m_previousSandboxTime = m_sandboxTime.GameTime;
 
@@ -101,6 +103,7 @@ namespace RealmEX.Diagnostics
 
                 Engine.Log.Information(
                     $"[RealmEX/M3] TICK frame={m_frames} scene={m_realm.Profile.SceneName} factor={m_realm.Profile.TimeFactor:F2} sandboxTime={m_sandboxTime.GameTime:F6} delta={delta:F6}");
+                m_realm.Draw(new Point2(256, 256));
 
                 if (m_frames < RequiredFrames)
                 {
@@ -112,6 +115,8 @@ namespace RealmEX.Diagnostics
                 Check(m_fastSamples > 0, "fast-scene-applied");
                 Check(m_fastDeltaTotal / m_fastSamples > m_slowDeltaTotal / m_slowSamples, "scene-time-factor-changed");
                 Check(m_realm.Storyboard.IsCompleted, "storyboard-completed");
+                Check(m_realm.Viewport.Texture != null, "viewport-texture-created");
+                Check(m_realm.Viewport.DrawCount > 0, "viewport-rendered");
 
                 stage = "destroy";
                 Check(RealmHost.DestroyRealm(TestRealmId), "realm-destroyed");
