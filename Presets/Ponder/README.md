@@ -10,7 +10,8 @@ Ponder 预设用于教程、演示、镜头脚本、标注和配置化场景展�
 - `RealmPonderStep`：场景名、时间倍率、说明文字、等待秒数。
 - `RealmPonderPlayer`：把教程步骤转换成 Realm 自驱动 async `RealmStoryboard`。
 - `RealmPonderSamples.CreateNotGateTutorial()`：内置非门真值表示例。
+- `RealmPonderDialog` / `RealmPonderVisuals`：玩家可见页面、caption、步骤进度、镜头与清屏色动画。
 
-非门示例目前用于验证 Ponder 配置 / Storyboard / 视口闭环，只展示「输入与输出相反」的教程逻辑；它不加载完整电路系统，也不声明真实电路仿真已经接入。**下一步（P3e）**应把视口与 caption 挂到玩家可见 Dialog，而不再只写控制台。
+非门示例目前用于验证 Ponder 配置 / Storyboard / 可见 UI 闭环，只展示「输入与输出相反」的教程逻辑；它不加载完整电路系统，也不声明真实电路仿真已经接入。当前 Minimal 沙箱视口以清屏色与镜头运动表达可见动画；真实方块布局后续补。
 
-游戏内按 **F6** 可运行 `[RealmEX/Ponder]` 诊断。
+游戏内按 **F6** 打开可见 `[RealmEX/Ponder]` Dialog。

@@ -64,7 +64,7 @@ namespace RealmEX
 
         public override void OnProjectLoaded(Project project)
         {
-            Engine.Log.Information("[RealmEX/Ponder] READY tutorial=not-gate action=PressF6");
+            Engine.Log.Information("[RealmEX/Ponder] READY tutorial=not-gate mode=visible-dialog action=PressF6");
             Engine.Log.Information("[RealmEX/M1T] READY scope=TerrainIsolation action=PressF7");
             Engine.Log.Information("[RealmEX/M1] READY scope=P1Core action=PressF8");
             Engine.Log.Information("[RealmEX/M2] READY scope=P2Tick action=PressF9");

@@ -20,6 +20,17 @@ namespace RealmEX.Core.Rendering
 
         public Color ClearColor { get; set; } = Color.Transparent;
 
+        /// <summary>
+        /// Soft-freeze additive：上层预设可改相机位姿，Draw 不再写死默认值。
+        /// </summary>
+        public Vector3 LookPosition { get; set; } = new(8.5f, 10f, 18f);
+
+        public Vector3 LookTarget { get; set; } = new(8.5f, 2f, 8.5f);
+
+        public Vector3 LookUp { get; set; } = Vector3.UnitY;
+
+        public float OrthographicWorldHeight { get; set; } = 16f;
+
         public Texture2D Texture => m_renderTarget;
 
         public Point2? RenderTargetSize =>
@@ -42,11 +53,11 @@ namespace RealmEX.Core.Rendering
             EnsureRenderTarget(size);
 
             Camera.SetupOrthographic(
-                new Vector3(8.5f, 10f, 18f),
-                new Vector3(8.5f, 2f, 8.5f),
-                Vector3.UnitY,
+                LookPosition,
+                LookTarget,
+                LookUp,
                 new Vector2(size.X, size.Y),
-                16f);
+                OrthographicWorldHeight);
             Camera.PrepareForDrawing(null);
 
             RenderTarget2D previousRenderTarget = Display.RenderTarget;

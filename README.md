@@ -16,7 +16,7 @@
 
 ## 当前进度
 
-P1 / P2 / P3a 核心已完成：`SandboxProject`、`RealmHost.TickParallel`、`SandboxRealm`、`RealmScene` 与 `RealmStoryboard` 已通过 F8 / F9 / F10 游戏内诊断。P3b 已完成模块边界归类，核心运行时位于 `Core`，诊断位于 `Diagnostics`，并预留 `Presets.Ponder` / `Presets.Create`。P3c 已落地 `RealmViewport` 离屏渲染核心与基础 `RealmPonderWidget`；M1T 已通过 F7 BlockEntity 注册与 Terrain cell 变更隔离游戏内诊断；P3d-async 已通过 F10 async Storyboard 诊断；P3d 已新增 F6 非门 Ponder 示例教程诊断。下一步为 **P3e 可见 Ponder Dialog**（Core soft freeze：不大改 Core，改动主落 `Presets.Ponder`）；**P4 可选持久化已延后**；内容模组扩展入口仍在后续阶段。详情见 `docs/实施计划.md`。
+P1 / P2 / P3a 核心已完成：`SandboxProject`、`RealmHost.TickParallel`、`SandboxRealm`、`RealmScene` 与 `RealmStoryboard` 已通过 F8 / F9 / F10 游戏内诊断。P3b 已完成模块边界归类，核心运行时位于 `Core`，诊断位于 `Diagnostics`，并预留 `Presets.Ponder` / `Presets.Create`。P3c 已落地 `RealmViewport` 离屏渲染核心与基础 `RealmPonderWidget`；M1T 已通过 F7 BlockEntity 注册与 Terrain cell 变更隔离游戏内诊断；P3d-async 已通过 F10 async Storyboard 诊断；P3d 已新增 F6 非门 Ponder 示例；**P3e 已通过可见 Ponder Dialog**（Core soft freeze：不大改 Core，改动主落 `Presets.Ponder`）；**P4 可选持久化已延后**；下一步为 P3f 配置协议 / 标注。详情见 `docs/实施计划.md`。
 
 ## 文档
 
@@ -104,20 +104,21 @@ M1T-3 起通过时会输出：
 
 该入口会创建一个短生命周期 `SandboxRealm`，通过 `RealmStoryboard` 依次应用 `m3-slow` 与 `m3-fast` 两个 `RealmScene`，验证换场景会改变沙箱时间倍率而不需要改 Host / Bootstrap。P3c 起，该入口也会做一次 256×256 离屏渲染，并检查 `viewport-texture-created` 与 `viewport-rendered`。P3d-async 起，M3 诊断使用 `await ctx.ApplyScene(...)` / `await ctx.WaitFrames(...)` 脚本语法驱动同一流程。
 
-## P3d Ponder 示例教程入口
+## P3e 可见 Ponder Dialog 入口
 
 1. 构建并部署 RealmEX，启动游戏后进入任意主世界。
-2. 日志出现 `[RealmEX/Ponder] READY` 后按一次 **F6**。
-3. 等待约 2 秒后正常退出世界。
-4. 检查 Mods 目录上一级的 `Game.log`，若不存在则查 `Bugs/Game.log`，搜索 `[RealmEX/Ponder]`。
+2. 日志出现 `[RealmEX/Ponder] READY ... mode=visible-dialog` 后按一次 **F6**。
+3. 应弹出 Ponder 页面：标题、Realm 视口（清屏色 / 镜头会随步骤变化）、说明文字与步骤进度。
+4. 等待步骤播完后点「关闭」，或中途 Esc / 返回关闭。
+5. 检查 Mods 目录上一级的 `Game.log`（或 `Bugs/Game.log`），搜索 `[RealmEX/Ponder]`。
 
 通过时会输出：
 
 ```text
-[RealmEX/Ponder] RESULT=PASS tutorial=not-gate
+[RealmEX/Ponder] RESULT=PASS tutorial=realmex:not_gate mode=visible-dialog
 ```
 
-该入口运行内置非门真值表示例，验证 Ponder 教程数据、async Storyboard、说明步骤日志和 Realm 视口闭环。它不代表完整电路系统已接入。
+该入口验证可见 Dialog / 视口上屏与教程节奏；当前 Minimal 沙箱尚无真实地形方块，视口以清屏色与镜头动画表达「世界在动」。完整方块场景与标注属后续 P3f。
 
 ## 内容模组接入（规划）
 
