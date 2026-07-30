@@ -5,6 +5,7 @@
 | 文档 | 性质 |
 | --- | --- |
 | [目标架构.md](architecture/目标架构.md) | **已确认**的目标架构、边界与不变量 |
+| [Terrain与BlockEntity隔离验收方案.md](architecture/Terrain与BlockEntity隔离验收方案.md) | Terrain / BlockEntity 隔离验收设计 |
 | [宿主耦合事实.md](architecture/宿主耦合事实.md) | 宿主 API 事实摘录（无实施计划） |
 | [嵌套存档模式事实.md](architecture/嵌套存档模式事实.md) | 社区嵌套存档模式抽象（持久化对照） |
 
