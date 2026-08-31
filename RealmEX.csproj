@@ -103,12 +103,12 @@
 		</None>
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="SurvivalcraftAPI.Survivalcraft" Version="1.9.2" />
+		<PackageReference Include="SurvivalcraftAPI.Survivalcraft" Version="1.9.3.1" />
 	</ItemGroup>
-	<Target Name="SyncVersion" BeforeTargets="Build" Condition="'$(RealmEXSkipSyncVersion)' != 'true'">
+	<Target Name="SyncVersion" BeforeTargets="Build" Condition="'$(Configuration)' != 'Test' and '$(RealmEXSkipSyncVersion)' != 'true'">
 		<Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(ProjectDir)tools\sync-version.ps1&quot;" />
 	</Target>
-	<Target Name="PackMod" AfterTargets="Build" Condition="'$(RealmEXSkipPack)' != 'true'">
+	<Target Name="PackMod" AfterTargets="Build" Condition="'$(Configuration)' != 'Test' and '$(RealmEXSkipPack)' != 'true'">
 		<PropertyGroup>
 			<_TargetDirSafe>$(TargetDir.TrimEnd('\'))</_TargetDirSafe>
 		</PropertyGroup>
