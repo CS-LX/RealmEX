@@ -24,8 +24,13 @@ namespace RealmEX.Presets.Ponder
 
             switch (sceneName)
             {
+                case "and-board":
+                    break;
                 case "and-intro":
                     PlaceGate(terrain);
+                    break;
+                case "and-inputs":
+                    PlaceInputs(terrain, false, false);
                     break;
                 case "and-00":
                     PlaceCircuit(terrain, inputA: false, inputB: false, outputOn: false);
@@ -83,6 +88,13 @@ namespace RealmEX.Presets.Ponder
 
         private static void PlaceCircuit(SubsystemTerrain terrain, bool inputA, bool inputB, bool outputOn)
         {
+            PlaceInputs(terrain, inputA, inputB);
+            terrain.ChangeCell(8, DeviceY, 7, MakeFloorWire());
+            terrain.ChangeCell(8, DeviceY, 6, MakeLed(outputOn));
+        }
+
+        private static void PlaceInputs(SubsystemTerrain terrain, bool inputA, bool inputB)
+        {
             // A 开关 —— 左；B 开关 —— 右；与门居中；LED 朝前。
             // 木板顶面（face 4）上的地板导线 + 开关 / 与门 / LED，真值表只做视觉示意。
             terrain.ChangeCell(6, DeviceY, 8, MakeSwitch(inputA));
@@ -90,8 +102,6 @@ namespace RealmEX.Presets.Ponder
             terrain.ChangeCell(7, DeviceY, 8, MakeFloorWire());
             terrain.ChangeCell(9, DeviceY, 8, MakeFloorWire());
             terrain.ChangeCell(8, DeviceY, 8, MakeAndGate());
-            terrain.ChangeCell(8, DeviceY, 7, MakeFloorWire());
-            terrain.ChangeCell(8, DeviceY, 6, MakeLed(outputOn));
         }
 
         private static int MakeAndGate()

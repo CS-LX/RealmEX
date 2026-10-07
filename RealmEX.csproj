@@ -64,6 +64,7 @@
 		<Compile Include="Diagnostics\RealmPonderDiagnostics.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderAndGateLayouts.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderBlockPresenter.cs" />
+		<Compile Include="Presets\Ponder\RealmPonderButtonWidget.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderCameraActions.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderDialog.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderEase.cs" />
@@ -80,6 +81,9 @@
 		<Compile Include="Properties\AssemblyInfo.cs" />
 	</ItemGroup>
 	<ItemGroup>
+		<None Update="Assets\Dialogs\RealmPonderDialog.xml">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="Assets\RealmEX\SandboxProjectTemplate.xdb">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>

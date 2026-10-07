@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Engine;
 using Engine.Graphics;
 using Game;
@@ -13,8 +14,12 @@ namespace RealmEX.Presets.Ponder
     public sealed class RealmPonderBlockPresenter : IDisposable
     {
         private readonly DynamicArray<TerrainChunkGeometry.Buffer> m_buffers = [];
+        private readonly DynamicArray<TerrainChunkGeometry.Buffer> m_revealBuffers = [];
+        private readonly Dictionary<Point3, int> m_previousCells = [];
         private BlockGeometryGenerator m_generator;
         private TerrainGeometry m_geometry;
+        private TerrainGeometry m_revealGeometry;
+        private double m_revealStartTime;
         private Shader m_shader;
         private bool m_needsUpdate = true;
         private SandboxRealm m_realm;
@@ -23,6 +28,7 @@ namespace RealmEX.Presets.Ponder
         {
             m_realm = realm ?? throw new ArgumentNullException(nameof(realm));
             m_realm.Viewport.AfterDraw = Draw;
+            Display.DeviceReset += Invalidate;
             m_needsUpdate = true;
         }
 
@@ -33,6 +39,7 @@ namespace RealmEX.Presets.Ponder
 
         public void Dispose()
         {
+            Display.DeviceReset -= Invalidate;
             if (m_realm != null)
             {
                 m_realm.Viewport.AfterDraw = null;
@@ -41,9 +48,13 @@ namespace RealmEX.Presets.Ponder
 
             DisposeBuffers();
             m_geometry?.ClearGeometry();
+            m_revealGeometry?.ClearGeometry();
+            m_previousCells.Clear();
             m_generator?.Terrain?.Dispose();
             m_generator = null;
             m_geometry = null;
+            m_revealGeometry = null;
+            m_shader?.Dispose();
             m_shader = null;
         }
 
@@ -53,25 +64,29 @@ namespace RealmEX.Presets.Ponder
             if (m_needsUpdate)
             {
                 RebuildGeometry(realm);
+                DisposeBuffers();
+                TerrainRenderer.CompileDrawSubsets([m_geometry], m_buffers);
+                TerrainRenderer.CompileDrawSubsets([m_revealGeometry], m_revealBuffers);
+                m_revealStartTime = Time.FrameStartTime;
                 m_needsUpdate = false;
             }
 
-            DisposeBuffers();
-            TerrainRenderer.CompileDrawSubsets([m_geometry], m_buffers, item => item);
-            for (int i = 0; i < m_buffers.Count; i++)
+            DrawBuffers(m_buffers, camera, 1f);
+            float progress = Math.Clamp((float)(Time.FrameStartTime - m_revealStartTime) / 0.45f, 0f, 1f);
+            DrawBuffers(m_revealBuffers, camera, 1f - MathF.Pow(1f - progress, 3f));
+        }
+
+        private void DrawBuffers(DynamicArray<TerrainChunkGeometry.Buffer> buffers, Camera camera, float reveal)
+        {
+            m_shader.GetParameter("u_viewProjectionMatrix").SetValue(camera.ViewProjectionMatrix);
+            m_shader.GetParameter("u_verticalOffset").SetValue((1f - reveal) * 0.6f);
+            m_shader.GetParameter("u_reveal").SetValue(reveal);
+            for (int i = 0; i < buffers.Count; i++)
             {
-                TerrainChunkGeometry.Buffer buffer = m_buffers[i];
+                TerrainChunkGeometry.Buffer buffer = buffers[i];
                 Display.BlendState = BlendState.AlphaBlend;
                 Display.DepthStencilState = DepthStencilState.Default;
                 Display.RasterizerState = RasterizerState.CullCounterClockwiseScissor;
-                m_shader.GetParameter("u_viewProjectionMatrix").SetValue(camera.ViewProjectionMatrix);
-                try
-                {
-                    m_shader.GetParameter("u_origin").SetValue(Vector2.Zero);
-                }
-                catch
-                {
-                }
                 m_shader.GetParameter("u_texture").SetValue(buffer.Texture);
                 m_shader.GetParameter("u_samplerState").SetValue(SamplerState.PointClamp);
                 m_shader.GetParameter("u_alphaThreshold").SetValue(0.5f);
@@ -125,6 +140,7 @@ namespace RealmEX.Presets.Ponder
                 null,
                 palette);
             m_geometry = new TerrainGeometry(animatedTextures.AnimatedBlocksTexture);
+            m_revealGeometry = new TerrainGeometry(animatedTextures.AnimatedBlocksTexture);
             m_shader = new Shader(
                 ShaderCodeManager.GetFast("Shaders/RealmPonderBlocks.vsh"),
                 ShaderCodeManager.GetFast("Shaders/RealmPonderBlocks.psh"),
@@ -186,6 +202,8 @@ namespace RealmEX.Presets.Ponder
 
             m_generator.ResetCache();
             m_geometry.ClearGeometry();
+            m_revealGeometry.ClearGeometry();
+            Dictionary<Point3, int> currentCells = [];
             for (int x = min; x <= max; x++)
             {
                 for (int z = min; z <= max; z++)
@@ -199,9 +217,13 @@ namespace RealmEX.Presets.Ponder
                             continue;
                         }
 
+                        Point3 position = new(x, y, z);
+                        int sourceValue = source.GetCellValueFast(x, y, z);
+                        currentCells[position] = sourceValue;
+                        bool changed = !m_previousCells.TryGetValue(position, out int oldValue) || oldValue != sourceValue;
                         BlocksManager.Blocks[content].GenerateTerrainVertices(
                             m_generator,
-                            m_geometry,
+                            changed ? m_revealGeometry : m_geometry,
                             value,
                             x,
                             y,
@@ -209,6 +231,8 @@ namespace RealmEX.Presets.Ponder
                     }
                 }
             }
+            m_previousCells.Clear();
+            foreach (var cell in currentCells) m_previousCells.Add(cell.Key, cell.Value);
         }
 
         private void DisposeBuffers()
@@ -218,6 +242,8 @@ namespace RealmEX.Presets.Ponder
                 buffer.Dispose();
             }
             m_buffers.Clear();
+            foreach (TerrainChunkGeometry.Buffer buffer in m_revealBuffers) buffer.Dispose();
+            m_revealBuffers.Clear();
         }
     }
 }

@@ -7,6 +7,7 @@ precision mediump float;
 #endif
 
 uniform sampler2D u_texture;
+uniform float u_reveal;
 #ifdef ALPHATESTED
 uniform float u_alphaThreshold;
 #endif
@@ -22,5 +23,6 @@ void main()
     if (result.a <= u_alphaThreshold)
         discard;
 #endif
-    gl_FragColor = result;
+    // The viewport and UI use premultiplied alpha.
+    gl_FragColor = vec4(result.rgb * result.a, result.a) * u_reveal;
 }

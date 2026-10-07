@@ -4,9 +4,8 @@
 // <Semantic Name='COLOR' Attribute='a_color' />
 // <Semantic Name='TEXCOORD' Attribute='a_texcoord' />
 
-uniform vec2 u_origin;
 uniform mat4 u_viewProjectionMatrix;
-uniform vec3 u_viewPosition;
+uniform float u_verticalOffset;
 
 attribute vec3 a_position;
 attribute vec4 a_color;
@@ -19,6 +18,6 @@ void main()
 {
     v_texcoord = a_texcoord;
     v_color = a_color;
-    gl_Position = u_viewProjectionMatrix * vec4(a_position.x - u_origin.x, a_position.y, a_position.z - u_origin.y, 1.0);
+    gl_Position = u_viewProjectionMatrix * vec4(a_position + vec3(0.0, u_verticalOffset, 0.0), 1.0);
     OPENGL_POSITION_FIX;
 }

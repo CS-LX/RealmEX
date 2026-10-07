@@ -1,0 +1,38 @@
+<CanvasWidget xmlns="runtime-namespace:Game" xmlns:p="runtime-namespace:RealmEX.Presets.Ponder">
+  <StackPanelWidget Name="Ponder.Content" Direction="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+    <CanvasWidget Name="Ponder.Header" Size="-1,76">
+      <StackPanelWidget Name="Ponder.Heading" Direction="Vertical" HorizontalAlignment="Near" VerticalAlignment="Center">
+        <LabelWidget Text="思索" Color="235,193,94" FontScale="0.65" />
+        <LabelWidget Name="Ponder.Title" Color="245,242,230" FontScale="1.2" Margin="0,4" Ellipsis="True" MaxLines="1" />
+      </StackPanelWidget>
+      <p:RealmPonderButtonWidget Name="Ponder.Close" Text="关闭" HorizontalAlignment="Far" VerticalAlignment="Center" />
+      <RectangleWidget Size="Infinity,2" FillColor="235,193,94,150" OutlineColor="0,0,0,0" VerticalAlignment="Far" IsHitTestVisible="False" />
+    </CanvasWidget>
+    <StackPanelWidget Name="Ponder.Stage" Direction="Horizontal">
+      <CanvasWidget Name="Ponder.Note" VerticalAlignment="Center" Margin="0,16">
+        <RectangleWidget FillColor="22,25,31,230" OutlineColor="0,0,0,0" IsHitTestVisible="False" />
+        <RectangleWidget Size="3,Infinity" FillColor="235,193,94" OutlineColor="0,0,0,0" HorizontalAlignment="Near" IsHitTestVisible="False" />
+        <ScrollPanelWidget Direction="Vertical" Margin="20,16">
+        <StackPanelWidget Name="Ponder.NoteContent" Direction="Vertical">
+          <LabelWidget Name="Ponder.Step" Color="235,193,94" FontScale="0.6" />
+          <LabelWidget Name="Ponder.StepTitle" Color="245,242,230" FontScale="0.95" WordWrap="True" Margin="0,8" />
+          <LabelWidget Name="Ponder.Caption" Color="218,222,229" FontScale="0.8" WordWrap="True" />
+        </StackPanelWidget>
+        </ScrollPanelWidget>
+      </CanvasWidget>
+      <p:RealmPonderWidget Name="Ponder.Viewport" />
+    </StackPanelWidget>
+    <StackPanelWidget Name="Ponder.Footer" Direction="Vertical">
+      <StackPanelWidget Name="Ponder.Chapters" Direction="Horizontal" HorizontalAlignment="Center" />
+      <CanvasWidget Size="-1,8" />
+      <StackPanelWidget Name="Ponder.Controls" Direction="Horizontal" HorizontalAlignment="Center">
+        <p:RealmPonderButtonWidget Name="Ponder.Previous" Text="上一步" Margin="3,0" />
+        <p:RealmPonderButtonWidget Name="Ponder.Play" Text="暂停" IsActive="True" Margin="3,0" />
+        <p:RealmPonderButtonWidget Name="Ponder.Next" Text="下一步" Margin="3,0" />
+        <p:RealmPonderButtonWidget Name="Ponder.Restart" Text="重播" Margin="3,0" />
+        <p:RealmPonderButtonWidget Name="Ponder.ResetView" Text="归位" Margin="3,0" />
+      </StackPanelWidget>
+      <LabelWidget Name="Ponder.Hint" Text="拖动旋转 · 滚轮缩放 · 空格暂停 · 左右键切换步骤" Color="170,176,186" FontScale="0.55" WordWrap="True" TextAnchor="HorizontalCenter" HorizontalAlignment="Center" Margin="0,10" />
+    </StackPanelWidget>
+  </StackPanelWidget>
+</CanvasWidget>

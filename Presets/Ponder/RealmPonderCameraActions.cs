@@ -44,7 +44,7 @@ namespace RealmEX.Presets.Ponder
 
             float start = m_angleRadians;
             float end = start + MathUtils.DegToRad(degrees);
-            if (seconds == 0.0)
+            if (seconds == 0.0 || m_context.IsSeeking)
             {
                 m_angleRadians = end;
                 Apply();
