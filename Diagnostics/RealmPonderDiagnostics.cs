@@ -29,7 +29,7 @@ namespace RealmEX.Diagnostics
                 }
 
                 stage = "create-dialog";
-                RealmPonderRegistry registry = RealmPonderSamples.CreateRegistry();
+                RealmPonderRegistry registry = RealmPonderContentLoader.Discover(ModsManager.ModList, message => Engine.Log.Warning("[RealmEX/Ponder] " + message));
                 RealmPonderTutorial tutorial = registry.Get("realmex:and_gate");
                 m_dialog = new RealmPonderDialog(tutorial, registry);
                 DialogsManager.ShowDialog(RealmPonderDialog.FindHostWidget(), m_dialog);

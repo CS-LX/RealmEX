@@ -122,9 +122,9 @@ M1T-3 起通过时会输出：
 
 该入口把真实方块写入 `RealmEXPonderProject` 沙箱 Terrain，使用与独立渲染验收相同的时间轴、会话、界面和 Shader。布局采用 XML + 调色板解析，脚本采用 C# 指令；当前验证范围见 [Ponder 对齐与接入](docs/Ponder对齐与接入.md)。
 
-## 内容模组接入（规划）
+## 内容模组可选接入
 
-内容模组在 `modinfo.json` 声明 `"com.realmex": "x.x.x"`，通过 `IRealmProjectTemplateContributor`（待实现）扩展 `SandboxProjectTemplate`，注册自有 Subsystem / Component。**RealmEX 核心不包含任何内容模组专有语义。**
+教程内容无需引用 RealmEX DLL，也无需在 `modinfo.json` 增加依赖。随模组打包 `*.ponder.xml` 元数据和 `.pjs` JavaScript 演出，RealmEX 自动发现、校验并加入目录；未安装 RealmEX 时不执行这些文件。支持原机器 XML 界面、UI 操作演示和完整物品值关联，见 [内容包接入](docs/Ponder内容包.md)。**RealmEX 不包含任何工业专有类型或设备 ID。**
 
 ## 仓库
 

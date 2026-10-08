@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Game;
 
 namespace RealmEX.Presets.Ponder
 {
@@ -49,7 +50,15 @@ namespace RealmEX.Presets.Ponder
         public RealmPonderText SharedText(string id) => m_sharedText[id];
         public RealmPonderTutorial Get(string id) => m_entries[id].Tutorial;
         public RealmPonderEntry Entry(string id) => m_entries[id];
-        public IReadOnlyList<RealmPonderTutorial> ForSubject(int blockContents) => m_entries.Values.Where(e => e.Subjects.Contains(blockContents)).OrderBy(e => e.Order).ThenBy(e => e.Tutorial.Id, StringComparer.Ordinal).Select(e => e.Tutorial).ToArray();
+        public IReadOnlyList<RealmPonderTutorial> ForSubject(int blockValue) => m_entries.Values.Where(e => e.Subjects.Any(subject => SameSubject(subject, blockValue))).OrderBy(e => e.Order).ThenBy(e => e.Tutorial.Id, StringComparer.Ordinal).Select(e => e.Tutorial).ToArray();
+        private static bool SameSubject(int subject, int value)
+        {
+            if (Terrain.ReplaceLight(subject, 0) == Terrain.ReplaceLight(value, 0)) return true;
+            if (Terrain.ExtractContents(subject) != Terrain.ExtractContents(value)) return false;
+            Block block = BlocksManager.Blocks[Terrain.ExtractContents(value)];
+            string craftingId = block?.GetCraftingId(value);
+            return !string.IsNullOrEmpty(craftingId) && string.Equals(craftingId, block.GetCraftingId(subject), StringComparison.Ordinal);
+        }
         public IReadOnlyList<RealmPonderEntry> Search(string query = "", string tag = null, string language = "en-US", bool includeHidden = false) => m_entries.Values
             .Where(e => (includeHidden || e.ShowInIndex) && (tag == null || e.Tags.Contains(tag)) && (string.IsNullOrWhiteSpace(query)
                 || e.Tutorial.Title.Resolve(language).Contains(query, StringComparison.OrdinalIgnoreCase)

@@ -93,7 +93,7 @@ namespace RealmEX.Presets.Ponder
                 if (Input.Click.HasValue && HitTestGlobal(Input.Click.Value.End) == this)
                 {
                     var selected = Pick(ScreenToWidget(Input.Click.Value.End));
-                    if (selected.HasValue) SubjectSelected?.Invoke(Terrain.ExtractContents(selected.Value.Value));
+                    if (selected.HasValue) SubjectSelected?.Invoke(Terrain.ReplaceLight(selected.Value.Value, 0));
                 }
             }
             else

@@ -36,7 +36,7 @@ namespace RealmEX.Presets.Ponder
                 CanvasWidget row = new() { IsHitTestVisible = false };
                 row.Children.Add(new RectangleWidget { Size = new(float.PositiveInfinity, 1), FillColor = new(24, 24, 24, 24), OutlineColor = Color.Transparent, VerticalAlignment = WidgetAlignment.Far, IsHitTestVisible = false });
                 var subjects = registry.Entry(tutorial.Id).Subjects;
-                if (subjects.Count > 0) row.Children.Add(new BlockIconWidget { Value = Terrain.MakeBlockValue(subjects[0], 15, 0), Size = new(56), Margin = new(8, 4), HorizontalAlignment = WidgetAlignment.Near, VerticalAlignment = WidgetAlignment.Center });
+                if (subjects.Count > 0) row.Children.Add(new BlockIconWidget { Value = Terrain.ReplaceLight(subjects[0], 15), Size = new(56), Margin = new(8, 4), HorizontalAlignment = WidgetAlignment.Near, VerticalAlignment = WidgetAlignment.Center });
                 row.Children.Add(new LabelWidget { Text = tutorial.Title.Resolve(m_language), FontScale = 1, WordWrap = true, Margin = new(subjects.Count > 0 ? 76 : 12, 6), VerticalAlignment = WidgetAlignment.Center, IsHitTestVisible = false });
                 return row;
             };

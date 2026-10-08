@@ -27,6 +27,21 @@ namespace RealmEX.Presets.Ponder
         public RealmPonderSceneBuilder UiEnabled(string target, bool enabled) => UiEdit((root, _) => RealmPonderUiWidget.Find(root, target).IsEnabled = enabled);
         public RealmPonderSceneBuilder UiVisible(string target, bool visible) => UiEdit((root, _) => RealmPonderUiWidget.Find(root, target).IsVisible = visible);
         public RealmPonderSceneBuilder UiValue(string target, float value) => UiEdit((root, _) => SetValue(root, target, value));
+        public RealmPonderSceneBuilder UiFont(string target, string asset) => UiEdit((root, _) =>
+        {
+            var font = ContentManager.Get<Engine.Media.BitmapFont>(asset);
+            switch (RealmPonderUiWidget.Find(root, target))
+            {
+                case LabelWidget label: label.Font = font; break;
+                case ButtonWidget button: button.Font = font; break;
+                default: throw new InvalidOperationException($"UI target '{target}' does not support a font.");
+            }
+        });
+        public RealmPonderSceneBuilder UiButtonColor(string target, Color color) => UiEdit((root, _) =>
+        {
+            var button = RealmPonderUiWidget.Find(root, target) as BevelledButtonWidget ?? throw new InvalidOperationException($"UI target '{target}' is not a bevelled button.");
+            button.BevelColor = button.CenterColor = color;
+        });
         public RealmPonderSceneBuilder UiInventory(string target) => UiEdit((root, _) =>
         {
             var grid = RealmPonderUiWidget.Find(root, target) as GridPanelWidget ?? throw new InvalidOperationException($"UI target '{target}' is not an inventory grid.");

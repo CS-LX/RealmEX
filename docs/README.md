@@ -16,6 +16,7 @@
 | [实施计划.md](实施计划.md) | 阶段计划、Ponder 预设、Create 预设与近期顺序 |
 | [Ponder对齐与接入.md](Ponder对齐与接入.md) | 上游对照矩阵、时间轴/场景 API、旧接口迁移与实际引擎验收 |
 | [Ponder机器界面演示.md](Ponder机器界面演示.md) | 原机器 UI、独立库存、点击/拖动/高亮、回退和滚动 |
+| [Ponder内容包.md](Ponder内容包.md) | 无程序集依赖的 XML 元数据、JavaScript 编排和模组自动发现 |
 | [依赖与NuGet.md](依赖与NuGet.md) | 可选 NuGet 调研备忘（未采纳） |
 
 ## 维护
