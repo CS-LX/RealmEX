@@ -1,1 +1,1 @@
-<BevelledButtonWidget xmlns="runtime-namespace:Game" Name="RealmEX.Ponder" Text="[RealmEXPonder:Open]" Size="240,60" HorizontalAlignment="Center" Margin="8,8" />
+<BevelledButtonWidget xmlns="runtime-namespace:Game" Name="RealmEX.Ponder" Text="ui.menu.open" Size="240,60" HorizontalAlignment="Center" Margin="8,8" />

@@ -24,10 +24,10 @@ namespace RealmEX.Presets.Ponder
             m_registry = registry; m_selected = selected; m_closed = closed; m_subjects = subjects;
             HorizontalAlignment = VerticalAlignment = WidgetAlignment.Center;
             LoadContents(this, ContentManager.Get<XElement>("Dialogs/RealmPonderIndexDialog"));
-            bool zh = m_language.StartsWith("zh", StringComparison.OrdinalIgnoreCase);
-            Children.Find<LabelWidget>("Index.Title").Text = zh ? "教程目录" : "Tutorial index";
-            Children.Find<LabelWidget>("Index.SearchLabel").Text = zh ? "搜索教程" : "Search tutorials";
-            Children.Find<LabelWidget>("Index.Empty").Text = zh ? "没有找到相关教程" : "No matching tutorials";
+            string Local(string key) => RealmPonderLocalization.BuiltIn.Text(key).Resolve(m_language);
+            Children.Find<LabelWidget>("Index.Title").Text = Local("ui.index.title");
+            Children.Find<LabelWidget>("Index.SearchLabel").Text = Local("ui.index.search");
+            Children.Find<LabelWidget>("Index.Empty").Text = Local("ui.index.empty");
             m_search = Children.Find<TextBoxWidget>("Index.Search");
             m_scenes = Children.Find<ListPanelWidget>("Index.Scenes");
             m_scenes.ItemWidgetFactory = item =>
@@ -45,7 +45,7 @@ namespace RealmEX.Presets.Ponder
             tags.ScrollPosition = 0; tags.ScrollSpeed = 0;
             tags.SelectionColor = new(24, 24, 24, 24);
             m_scenes.SelectionColor = new(24, 24, 24, 24);
-            tags.AddItem(new RealmPonderTag("", new("全部", "All"), ""));
+            tags.AddItem(new RealmPonderTag("", RealmPonderLocalization.BuiltIn.Text("ui.index.all"), ""));
             tags.AddItems(registry.Tags.Cast<object>());
             tags.SelectedIndex = 0;
             tags.ItemWidgetFactory = item => new LabelWidget { Text = ((RealmPonderTag)item).Title.Resolve(m_language), FontScale = 1, WordWrap = true, HorizontalAlignment = WidgetAlignment.Center, VerticalAlignment = WidgetAlignment.Center };

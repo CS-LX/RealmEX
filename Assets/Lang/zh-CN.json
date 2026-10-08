@@ -1,9 +1,0 @@
-{
-  "ContentWidgets": {
-    "RealmEXPonder": { "Open": "思索教程" }
-  },
-  "RealmEXPonder": {
-    "Unavailable": "暂时无法打开教程",
-    "UnavailableDetail": "请关闭后重试。"
-  }
-}

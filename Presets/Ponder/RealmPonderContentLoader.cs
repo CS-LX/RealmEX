@@ -67,7 +67,6 @@ namespace RealmEX.Presets.Ponder
                     if (string.Equals(block.GetCraftingId(value), id, StringComparison.Ordinal)) return Terrain.ReplaceLight(value, 0);
             throw new FormatException($"Unknown crafting ID '{id}'.");
         }
-        internal static RealmPonderText Text(XElement node) => new(Required(node, "Zh"), Required(node, "En"));
         internal static string Required(XElement node, string name) => (string)node.Attribute(name) is { Length: > 0 } value ? value : throw new FormatException($"Missing {node.Name}/{name}.");
         private sealed class Pack : IRealmPonderPlugin
         {
@@ -78,7 +77,7 @@ namespace RealmEX.Presets.Ponder
             public string Namespace { get; }
             public Pack(string path, XElement xml, Func<string, string> read, Func<string, int> resolve)
             {
-                if (xml.Name != "PonderPack" || (int?)xml.Attribute("Version") != 1) throw new FormatException("Unsupported PonderPack version.");
+                if (xml.Name != "PonderPack" || (int?)xml.Attribute("Version") != 2) throw new FormatException("Unsupported PonderPack version. Use version 2 with JSON locales and text keys.");
                 Namespace = Required(xml, "Namespace");
                 if (Namespace.Any(c => !char.IsAsciiLetterOrDigit(c) && c is not '_' and not '-' and not '.')) throw new FormatException("Invalid pack namespace.");
                 m_directory = path.Contains('/') ? path[..(path.LastIndexOf('/') + 1)] : "";
@@ -97,6 +96,9 @@ namespace RealmEX.Presets.Ponder
             }
             public void Register(RealmPonderRegistry registry)
             {
+                var localization = new RealmPonderLocalization(m_xml.Elements("Locale").ToDictionary(
+                    locale => Required(locale, "Name"), locale => m_read(Resource(Required(locale, "File"))), StringComparer.OrdinalIgnoreCase));
+                RealmPonderText Text(XElement node) => localization.Text(Required(node, "Text"));
                 Dictionary<string, int> palette = new(StringComparer.Ordinal);
                 foreach (var block in m_xml.Element("Palette")?.Elements("Block") ?? [])
                 {
@@ -118,7 +120,7 @@ namespace RealmEX.Presets.Ponder
                     var schematic = tutorial.Attribute("Schematic") is { } source
                         ? RealmPonderSchematic.Load(ParseXml(m_read(Resource(source.Value))), id => palette[id]) : new RealmPonderSchematic([]);
                     var builder = new RealmPonderSceneBuilder(Id(Required(tutorial, "Id")), Text(tutorial), schematic);
-                    RealmPonderScript.Compile(builder, m_read(script), script, palette, interfaces);
+                    RealmPonderScript.Compile(builder, m_read(script), script, palette, interfaces, localization);
                     RealmPonderTutorial result = builder.Build();
                     new RealmPonderPlayer(result).Seek(result.Duration); // Validate section/UI ordering before publishing the pack.
                     string[] tutorialTags = ((string)tutorial.Attribute("Tags") ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);

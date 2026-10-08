@@ -101,11 +101,12 @@ void Save(Widget widget, int width, int height, string name) {
 }
 
 void VerifyMachineUi(string language) {
-    var builder = new RealmPonderSceneBuilder("preview:machine_ui", new("熔炉界面演示", "Using the furnace"), new([]));
-    builder.ShowUi(RealmPonderUiDefinition.FromXml("Widgets/FurnaceWidget", new("熔炉", "Furnace"), new(614, 382)))
+    var texts = new RealmPonderLocalization(new[] { "zh-CN", "en-US" }.ToDictionary(l => l, l => File.ReadAllText(Path.Combine(root, "tools/preview/fixtures/" + l + ".json"))));
+    var builder = new RealmPonderSceneBuilder("preview:machine_ui", texts.Text("furnace.title"), new([]));
+    builder.ShowUi(RealmPonderUiDefinition.FromXml("Widgets/FurnaceWidget", texts.Text("furnace.name"), new(614, 382)))
         .UiInventory("InventoryGrid").UiInventory("FurnaceGrid")
         .UiItem("InventoryGrid.0", PlanksBlock.Index, 8)
-        .Text("help", new("将燃料放入燃料槽，右侧可查看加工进度。", "Move fuel into the fuel slot. The bar on the right shows processing progress."), Vector3.Zero, 160)
+        .Text("help", texts.Text("furnace.help"), Vector3.Zero, 160)
         .Idle(10).UiDrag("InventoryGrid.0", "FuelSlot", 30).Idle(30)
         .UiItem("InventoryGrid.0", 0, 0).UiItem("FuelSlot", PlanksBlock.Index, 8)
         .UiAnimateValue("Progress", 0, 1, 60).Idle(60).UiPoint("ResultSlot", 60).UiItem("ResultSlot", GlassBlock.Index, 1).Idle(60);

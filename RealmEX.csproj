@@ -61,6 +61,7 @@
 		<Compile Include="Presets\Ponder\RealmPonderButtonWidget.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderDialog.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderPlayer.cs" />
+		<Compile Include="Presets\Ponder\RealmPonderLocalization.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderSamples.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderTutorial.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderSelection.cs" />
@@ -96,7 +97,7 @@
 		<None Update="Assets\RealmEX\SandboxProjectTemplate.xdb">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Update="Assets\Widgets\RealmPonderMenuEntry.xml;Assets\Lang\*.json"><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory></None>
+		<None Update="Assets\Widgets\RealmPonderMenuEntry.xml;Assets\RealmEX\Lang\*.json"><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory></None>
 		<None Update="Assets\RealmEX\PonderSandboxProjectTemplate.xdb">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>

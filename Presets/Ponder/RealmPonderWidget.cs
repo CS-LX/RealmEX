@@ -66,10 +66,10 @@ namespace RealmEX.Presets.Ponder
                 string text = overlay.Text.Resolve(Language);
                 if (overlay.Kind == RealmPonderOverlayKind.Controls)
                 {
-                    bool zh = Language.StartsWith("zh", StringComparison.OrdinalIgnoreCase);
-                    text = overlay.Input switch { RealmPonderInput.Interact => zh ? "交互" : "Interact", RealmPonderInput.Use => zh ? "使用" : "Use", RealmPonderInput.Scroll => zh ? "滚动" : "Scroll", _ => zh ? "移动" : "Move" };
-                    if (overlay.Sneak) text = (zh ? "潜行 + " : "Sneak + ") + text;
-                    if (overlay.ItemValue != 0) text += " · " + BlocksManager.Blocks[Terrain.ExtractContents(overlay.ItemValue)].GetDisplayName(Realm?.Project.FindSubsystem<SubsystemTerrain>(false), overlay.ItemValue);
+                    text = RealmPonderLocalization.BuiltIn.Text("ui.input." + overlay.Input.ToString().ToLowerInvariant()).Resolve(Language);
+                    if (overlay.Sneak) text = RealmPonderLocalization.BuiltIn.Text("ui.input.sneak", text).Resolve(Language);
+                    if (overlay.ItemValue != 0) text = RealmPonderLocalization.BuiltIn.Text("ui.input.item", text,
+                        BlocksManager.Blocks[Terrain.ExtractContents(overlay.ItemValue)].GetDisplayName(Realm?.Project.FindSubsystem<SubsystemTerrain>(false), overlay.ItemValue)).Resolve(Language);
                     if (overlay.ItemValue != 0 && callout.Item == null)
                     {
                         callout.Item = new BlockIconWidget { Size = new(36), HorizontalAlignment = WidgetAlignment.Near, VerticalAlignment = WidgetAlignment.Center, Margin = new(2, 0) };

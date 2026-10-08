@@ -16,6 +16,7 @@ namespace RealmEX.Presets.Ponder
             var more = menu.Children.Find<ButtonWidget>("More", false);
             if (more?.ParentWidget?.ParentWidget is not StackPanelWidget buttons) return;
             var button = (BevelledButtonWidget)Widget.LoadWidget(null, ContentManager.Get<XElement>("Widgets/RealmPonderMenuEntry"), null);
+            button.Text = RealmPonderLocalization.BuiltIn.Text(button.Text).Resolve(LanguageControl.CurrentLanguageName);
             button.Update1 = () =>
             {
                 button.Update();
@@ -41,8 +42,8 @@ namespace RealmEX.Presets.Ponder
             catch (Exception ex)
             {
                 Engine.Log.Error($"[RealmEX/Ponder] Could not open the tutorial catalog: {ex}");
-                DialogsManager.ShowDialog(owner, new MessageDialog(LanguageControl.Get("RealmEXPonder", "Unavailable"),
-                    LanguageControl.Get("RealmEXPonder", "UnavailableDetail"), LanguageControl.Ok, null, null));
+                string Local(string key) => RealmPonderLocalization.BuiltIn.Text(key).Resolve(LanguageControl.CurrentLanguageName);
+                DialogsManager.ShowDialog(owner, new MessageDialog(Local("ui.unavailable"), Local("ui.unavailable_detail"), LanguageControl.Ok, null, null));
             }
         }
         public static void Reset()

@@ -12,5 +12,6 @@
     <EmbeddedResource Include="..\Assets\Dialogs\RealmPonderDialog.xml" LogicalName="PonderDialog.xml" />
     <EmbeddedResource Include="..\Assets\RealmEX\Ponder\AndGate.xml" LogicalName="AndGate.xml" />
     <EmbeddedResource Include="..\Assets\RealmEX\Ponder\Pumpkin.xml" LogicalName="Pumpkin.xml" />
+    <EmbeddedResource Include="..\Assets\RealmEX\Lang\*.json" LogicalName="PonderLang.%(Filename).json" />
   </ItemGroup>
 </Project>

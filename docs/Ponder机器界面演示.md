@@ -5,14 +5,16 @@ UI 演示与方块演出共用 20 Hz 时间轴。`ShowUi` 创建独立控件树�
 界面保留机器原有风格、默认字体和尺寸。大窗口将说明与机器并排，小窗口将说明置于上方，机器区双向滚动。高亮目标改变时自动滚入可见区，玩家仍可自行拖动。UI 区截获自己的拖动，不旋转后面的场景；演示控件不接收玩家的真实点击。
 
 ```csharp
+// localeJson 为从所属模组读取的「语言名 → JSON 内容」字典。
+RealmPonderLocalization translations = new(localeJson);
 builder.ShowUi(RealmPonderUiDefinition.FromXml(
-    "Widgets/FurnaceWidget", new("熔炉", "Furnace"), new(614, 382)))
+    "Widgets/FurnaceWidget", translations.Text("ui.furnace"), new(614, 382)))
     .UiInventory("InventoryGrid")
     .UiInventory("FurnaceGrid")
     .UiItem("InventoryGrid.0", PlanksBlock.Index, 8)
     .Idle(20)
-    .UiDrag("InventoryGrid.0", "FuelSlot", 30)
-    .Idle(30)
+    .UiDrag("InventoryGrid.0", "FuelSlot", 12)
+    .Idle(12)
     .UiItem("InventoryGrid.0", 0, 0)
     .UiItem("FuelSlot", PlanksBlock.Index, 8)
     .UiAnimateValue("Progress", 0, 1, 60)
@@ -24,7 +26,7 @@ builder.ShowUi(RealmPonderUiDefinition.FromXml(
 
 | 指令 | 用途 |
 | --- | --- |
-| `UiText` | 修改 Label、Button 或 TextBox，接受中英文文本 |
+| `UiText` | 修改 Label、Button 或 TextBox，接受 JSON 译文 key 的 `RealmPonderText` 引用 |
 | `UiEnabled` / `UiVisible` | 更新指定控件状态 |
 | `UiValue` / `UiAnimateValue` | 修改或按时间轴动画显示 Slider / ValueBar 的数值 |
 | `UiInventory` | 为现有空 Grid 创建独立库存；格子命名为 `GridName.0` 等 |

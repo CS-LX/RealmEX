@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using Engine;
 using Jint;
@@ -10,7 +11,7 @@ namespace RealmEX.Presets.Ponder
     public static class RealmPonderScript
     {
         public static void Compile(RealmPonderSceneBuilder builder, string source, string sourceName,
-            IReadOnlyDictionary<string, int> palette, IReadOnlyDictionary<string, RealmPonderUiDefinition> interfaces)
+            IReadOnlyDictionary<string, int> palette, IReadOnlyDictionary<string, RealmPonderUiDefinition> interfaces, RealmPonderLocalization localization = null)
         {
             int commands = 0;
             using var engine = new Jint.Engine(options => options.MaxStatements(100000).LimitMemory(16 * 1024 * 1024).TimeoutInterval(TimeSpan.FromSeconds(3)).LimitRecursion(64));
@@ -29,7 +30,19 @@ namespace RealmEX.Presets.Ponder
                 Vector3 V(int n) => new(args[n][0].GetSingle(), args[n][1].GetSingle(), args[n][2].GetSingle());
                 Point3 P(int n) => new(args[n][0].GetInt32(), args[n][1].GetInt32(), args[n][2].GetInt32());
                 RealmPonderSelection Box(int n) => RealmPonderSelection.Box(P(n), P(n + 1));
-                RealmPonderText Text(int n) => args[n].ValueKind == JsonValueKind.String ? S(n) : new RealmPonderText(args[n][0].GetString(), args[n][1].GetString());
+                RealmPonderText Text(int n)
+                {
+                    if (localization == null) throw new FormatException("Script text requires a translation catalog.");
+                    var text = args[n];
+                    if (text.ValueKind == JsonValueKind.String) return localization.Text(S(n));
+                    object Argument(JsonElement value) => value.ValueKind switch
+                    {
+                        JsonValueKind.String => value.GetString(), JsonValueKind.Number => value.GetDouble(),
+                        JsonValueKind.True => true, JsonValueKind.False => false,
+                        _ => throw new FormatException("Translation parameters must be strings, numbers or booleans.")
+                    };
+                    return localization.Text(text.GetProperty("key").GetString(), text.GetProperty("args").EnumerateArray().Select(Argument).ToArray());
+                }
                 int Value(int n) => args[n].ValueKind == JsonValueKind.String ? palette[S(n)] : I(n);
                 Color Color(int n) => args.GetArrayLength() <= n ? new Color(230, 210, 130) : new Color(args[n][0].GetByte(), args[n][1].GetByte(), args[n][2].GetByte());
                 switch (op)
@@ -83,6 +96,7 @@ namespace RealmEX.Presets.Ponder
                     const emit = __emit;
                     delete globalThis.__emit;
                     const api = {};
+                    api.t = (key, ...args) => Object.freeze({key, args});
                     for (const op of ['idle','keyframe','camera','rotateCamera','section','show','hide','move','rotate','fill','restore','text','outline','line','removeOverlay','item','moveItem','removeItem','success','finish','uiShow','uiHide','uiText','uiFont','uiButtonColor','uiEnabled','uiVisible','uiValue','uiConfigure','uiAnimateValue','uiInventory','uiItem','uiButton','uiPoint','uiClick','uiDrag','uiScroll'])
                         api[op] = (...args) => emit(JSON.stringify({op, args}));
                     let seed = 1;

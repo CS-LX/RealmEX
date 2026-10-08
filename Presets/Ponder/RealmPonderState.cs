@@ -10,11 +10,6 @@ namespace RealmEX.Presets.Ponder
     public enum RealmPonderOverlayKind { Text, Controls, Outline, Bounds, Line, Success, Particle }
     public enum RealmPonderTextPlacement { Auto, NearTarget, TopLeft, TopRight, BottomLeft, BottomRight }
     public enum RealmPonderInput { Interact, Use, Scroll, Move }
-    public sealed record RealmPonderText(string Chinese, string English)
-    {
-        public string Resolve(string language) => language?.StartsWith("zh", StringComparison.OrdinalIgnoreCase) == true ? Chinese : English;
-        public static implicit operator RealmPonderText(string text) => new(text, text);
-    }
     public sealed record RealmPonderOverlay(string Id, RealmPonderOverlayKind Kind, int StartTick, int Duration,
         Vector3 Position, Vector3 End, RealmPonderText Text, Color Color, RealmPonderSelection Selection = null,
         RealmPonderInput Input = RealmPonderInput.Interact, int ItemValue = 0, bool Sneak = false, RealmPonderTextPlacement Placement = RealmPonderTextPlacement.Auto)

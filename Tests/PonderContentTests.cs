@@ -8,22 +8,26 @@ namespace RealmEX.Tests;
 
 public sealed class PonderContentTests
 {
+    const string English = """{"building":"Building","machine":"Machine","build":"Build","move":"Move","complete":"Complete"}""";
+    const string Chinese = """{"building":"建造","machine":"机器","build":"搭建","move":"移动","complete":"完成"}""";
+    static string Read(string path, string script) => path.EndsWith("en-US.json") ? English : path.EndsWith("zh-CN.json") ? Chinese : script;
     const string Manifest = """
-        <PonderPack Version="1" Namespace="example">
+        <PonderPack Version="2" Namespace="example">
+          <Locale Name="en-US" File="en-US.json"/><Locale Name="zh-CN" File="zh-CN.json"/>
           <Palette><Block Id="stone" Value="3" /></Palette>
-          <Tag Id="building" Zh="建造" En="Building" />
-          <Tutorial Id="machine" Zh="机器" En="Machine" Script="machine.pjs" Subjects="stone" Tags="building" />
+          <Tag Id="building" Text="building" />
+          <Tutorial Id="machine" Text="machine" Script="machine.pjs" Subjects="stone" Tags="building" />
         </PonderPack>
         """;
     const string Script = """
         if (typeof System !== 'undefined' || typeof importNamespace !== 'undefined') throw new Error('CLR exposed');
-        scene.keyframe(['搭建', 'Build']);
+        scene.keyframe('build');
         for (let x = 0; x < 3; x++) scene.fill([x, 1, 0], [x, 1, 0], 'stone');
         scene.show('base', [0, -1, 0], 10);
         scene.idle(20);
-        scene.keyframe(['移动', 'Move']);
+        scene.keyframe('move');
         scene.move('base', [3, 0, 0], 20);
-        scene.text('help', ['完成', 'Complete'], [0, 1, 0], 20);
+        scene.text('help', 'complete', [0, 1, 0], 20);
         scene.idle(20);
         """;
     sealed class Mod(Dictionary<string, string> files) : ModEntity
@@ -43,7 +47,7 @@ public sealed class PonderContentTests
     [Fact]
     public void LoadedModIsDiscoveredAndJavascriptLogicCompilesIntoReplayableScenes()
     {
-        var mod = new Mod(new() { ["Ponder/content.ponder.xml"] = Manifest, ["Ponder/machine.pjs"] = Script }) { modInfo = new() { PackageName = "example" } };
+        var mod = new Mod(new() { ["Ponder/content.ponder.xml"] = Manifest, ["Ponder/en-US.json"] = English, ["Ponder/zh-CN.json"] = Chinese, ["Ponder/machine.pjs"] = Script }) { modInfo = new() { PackageName = "example" } };
         List<string> errors = [];
         var registry = RealmPonderContentLoader.Discover([mod], errors.Add, new());
         Assert.Empty(errors);
@@ -60,9 +64,9 @@ public sealed class PonderContentTests
     [Fact]
     public void BrokenPackRollsBackWithoutHidingAnotherModsTutorial()
     {
-        var good = new Mod(new() { ["Ponder/content.ponder.xml"] = Manifest, ["Ponder/machine.pjs"] = Script }) { modInfo = new() { PackageName = "a-good" } };
-        string brokenXml = Manifest.Replace("example", "broken").Replace("</PonderPack>", "<Tutorial Id='bad' Zh='坏' En='Bad' Script='bad.pjs'/></PonderPack>");
-        var bad = new Mod(new() { ["Ponder/content.ponder.xml"] = brokenXml, ["Ponder/machine.pjs"] = Script, ["Ponder/bad.pjs"] = "scene.nonexistent();" }) { modInfo = new() { PackageName = "z-bad" } };
+        var good = new Mod(new() { ["Ponder/content.ponder.xml"] = Manifest, ["Ponder/en-US.json"] = English, ["Ponder/zh-CN.json"] = Chinese, ["Ponder/machine.pjs"] = Script }) { modInfo = new() { PackageName = "a-good" } };
+        string brokenXml = Manifest.Replace("example", "broken").Replace("</PonderPack>", "<Tutorial Id='bad' Text='machine' Script='bad.pjs'/></PonderPack>");
+        var bad = new Mod(new() { ["Ponder/content.ponder.xml"] = brokenXml, ["Ponder/en-US.json"] = English, ["Ponder/zh-CN.json"] = Chinese, ["Ponder/machine.pjs"] = Script, ["Ponder/bad.pjs"] = "scene.nonexistent();" }) { modInfo = new() { PackageName = "z-bad" } };
         List<string> errors = [];
         var registry = RealmPonderContentLoader.Discover([good, bad], errors.Add, new());
         Assert.Single(errors); Assert.Single(registry.Search()); Assert.Single(registry.Tags);
@@ -71,13 +75,13 @@ public sealed class PonderContentTests
     [Theory]
     [InlineData("while (true) {}")]
     [InlineData("scene.show('missing', [0,0,0], 20)")]
-    [InlineData("scene.uiText('label', 'Must first show UI')")]
+    [InlineData("scene.uiText('label', 'machine')")]
     [InlineData("scene.idle(24001)")]
     [InlineData("scene.fill([0,-1,0],[0,-1,0], 'stone')")]
     public void InvalidScriptsCannotPublishPartialTutorials(string script)
     {
         var registry = new RealmPonderRegistry();
-        Assert.ThrowsAny<Exception>(() => RealmPonderContentLoader.Load(registry, "Ponder/content.ponder.xml", Manifest, _ => script, _ => 3));
+        Assert.ThrowsAny<Exception>(() => RealmPonderContentLoader.Load(registry, "Ponder/content.ponder.xml", Manifest, path => Read(path, script), _ => 3));
         Assert.Empty(registry.Search()); Assert.Empty(registry.Tags);
     }
     [Theory]
@@ -87,7 +91,7 @@ public sealed class PonderContentTests
     public void ResourcePathsStayWithinThePackAndDoNotUseHostAutoExecutedJs(string path)
     {
         var registry = new RealmPonderRegistry();
-        Assert.Throws<FormatException>(() => RealmPonderContentLoader.Load(registry, "Ponder/content.ponder.xml", Manifest.Replace("machine.pjs", path), _ => Script, _ => 3));
+        Assert.Throws<FormatException>(() => RealmPonderContentLoader.Load(registry, "Ponder/content.ponder.xml", Manifest.Replace("machine.pjs", path), path => Read(path, Script), _ => 3));
         Assert.Empty(registry.Search());
     }
     sealed class DeviceBlock : AirBlock

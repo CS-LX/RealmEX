@@ -5,15 +5,17 @@
 JavaScript 源文件使用 **`.pjs`** 后缀。宿主会无条件执行模组内的普通 `.js`；换后缀是为了避免未安装 RealmEX 时的全局脚本副作用，语法仍是 JavaScript。文件由拥有该清单的 `ModEntity.GetFile` 读取，支持普通包及 FastDebug。路径相对清单所在目录，不能跨目录向上引用。
 
 ```xml
-<PonderPack Version="1" Namespace="example">
+<PonderPack Version="2" Namespace="example">
+  <Locale Name="en-US" File="lang/en-US.json" />
+  <Locale Name="zh-CN" File="lang/zh-CN.json" />
   <Palette>
     <Block Id="stone" CraftingId="stone" />
     <Block Id="controller" CraftingId="YourController" DataOffset="0" />
   </Palette>
-  <Tag Id="machines" Zh="机器" En="Machines" />
+  <Tag Id="machines" Text="tag.machines" />
   <Ui Id="controller" Asset="Widgets/YourControllerWidget" Width="614" Height="382"
-      Zh="控制器" En="Controller" />
-  <Tutorial Id="first_machine" Zh="第一台机器" En="Your first machine"
+      Text="ui.controller" />
+  <Tutorial Id="first_machine" Text="tutorial.first_machine"
       Script="first_machine.pjs" Schematic="first_machine.xml"
       Tags="machines" Subjects="controller" Order="10" />
 </PonderPack>
@@ -23,32 +25,50 @@ JavaScript 源文件使用 **`.pjs`** 后缀。宿主会无条件执行模组内
 
 快照复用 `PonderSchematic Version="1"`，`Fill` 的 `Block` 指向清单调色板。`Ui` 复用内容模组原有机器 XML；由 C# 动态生成的库存/按钮可通过脚本显式补齐。
 
+清单版本 2 中，`Text` 与脚本文本参数都保存 key；旧版 `Zh`/`En` 属性和双语数组不再使用。每个包必须提供 `en-US`，其它语言可逐项补译。JSON 为扁平字符串字典，例如 `lang/en-US.json`：
+
+```json
+{
+  "tag.machines": "Machines",
+  "ui.controller": "Controller",
+  "tutorial.first_machine": "Your first machine",
+  "step.base": "Build the base",
+  "help.base": "Start with the base.",
+  "ui.start": "Start",
+  "ui.stop": "Stop",
+  "ui.temperature": "Temperature {0} T"
+}
+```
+
+在 `lang/zh-CN.json` 中使用相同 key 和中文译文。实际解析顺序是完整语言名、父语言、`en-US`；当前语言缺少某个 key 时也回退英文。英文 key 缺失、重复 key、非字符串值或参数不足会使该内容包注册失败并回滚，不把内部 key 展示给玩家。各包的字典独立，同名 key 不互相覆盖。
+
 ```javascript
 scene.camera([8, 2, 8], 9, 35);
-scene.keyframe(["搭建底座", "Build the base"]);
+scene.keyframe("step.base");
 for (let x = 6; x <= 10; x++) scene.fill([x, 0, 6], [x, 0, 10], "stone");
 scene.show("base", [0, -1, 0], 20);
-scene.text("help", ["先搭好底座。", "Start with the base."], [8, 0, 8], 100);
+scene.text("help", "help.base", [8, 0, 8], 100);
 scene.idle(100);
-scene.keyframe(["控制器", "Controller"]);
+scene.keyframe("ui.controller");
 scene.uiShow("controller");
 scene.uiInventory("InventoryGrid");
-scene.uiText("RunButton", ["启动", "Start"]);
+scene.uiText("RunButton", "ui.start");
 scene.uiPoint("RunButton", 60);
 scene.idle(60);
 scene.uiClick("RunButton", 20);
 scene.idle(20);
-scene.uiText("RunButton", ["停机", "Stop"]);
+scene.uiText("RunButton", "ui.stop");
 scene.idle(60);
 scene.uiHide();
 ```
 
-除了 `idle`，指令不移动编排游标。同一时刻的动画并行执行。坐标为三元素数组，范围参数为两个角点数组，文本为字符串或 `[中文, English]`。时间均为 tick（每秒 20）；UI 文档见 [机器界面演示](Ponder机器界面演示.md)。
+除了 `idle`，指令不移动编排游标。同一时刻的动画并行执行。坐标为三元素数组，范围参数为两个角点数组。文本参数使用 key 或 `scene.t(key, ...参数)`，例如 `scene.uiText("TemperatureLabel", scene.t("ui.temperature", 120))`；译文中的 `{0}` 接收参数，参数在编译该动作时保存，后续 JS 变量变化不影响回放。时间均为 tick（每秒 20）；UI 文档见 [机器界面演示](Ponder机器界面演示.md)。
 
 模拟鼠标按画面帧插值，不受 20 Hz 逻辑步进限制；暂停、变速、舒适阅读和跳转仍共用场景时间。跨槽拖动建议使用 `12` tick（正常速度 0.6 秒），到达后立即更新物品，再用 `idle` 留出阅读时间，避免让光标缓慢滑行数秒。
 
 | JS 指令 | 参数顺序 |
 | --- | --- |
+| `t` | key, ...参数；返回文本引用，不推进时间 |
 | `idle` / `keyframe` | ticks / text |
 | `camera` / `rotateCamera` | target, viewHeight, yaw / degrees, duration |
 | `section` | id, from, to |

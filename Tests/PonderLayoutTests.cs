@@ -10,8 +10,6 @@ public sealed class PonderLayoutTests
 {
     static PonderLayoutTests()
     {
-        LabelWidget.BitmapFont = new BitmapFont(null,
-            [new BitmapFont.Glyph('?', Vector2.Zero, Vector2.One, Vector2.Zero, 24f)], '?', 28f, Vector2.Zero, 1f);
         ContentManager.AddContentReader(new Game.IContentReader.XmlReader());
         Add("PonderDialog.xml", "Dialogs/RealmPonderDialog.xml");
         Add("AndGate.xml", "RealmEX/Ponder/AndGate.xml");

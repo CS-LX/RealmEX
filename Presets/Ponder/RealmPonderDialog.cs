@@ -45,10 +45,10 @@ namespace RealmEX.Presets.Ponder
             };
             foreach (string id in new[] { "Index", "Close", "PreviousScene", "Previous", "Play", "Next", "NextScene", "Restart", "Inspect", "Reading", "ResetView" })
                 m_buttons.Add(id, Children.Find<RealmPonderButtonWidget>("Ponder." + id));
-            Children.Find<LabelWidget>("Ponder.Brand").Text = Local("思索", "Ponder");
+            Children.Find<LabelWidget>("Ponder.Brand").Text = Local("ui.ponder");
             SelectTutorial(tutorial);
         }
-        private string Local(string zh, string en) => m_language.StartsWith("zh", StringComparison.OrdinalIgnoreCase) ? zh : en;
+        private string Local(string key) => RealmPonderLocalization.BuiltIn.Text(key).Resolve(m_language);
         public void SelectTutorial(RealmPonderTutorial tutorial)
         {
             bool comfy = Player?.ComfyReading ?? false;
@@ -63,8 +63,8 @@ namespace RealmEX.Presets.Ponder
             try { m_viewport.RefreshPresentation(); }
             catch (Exception ex) { PlaybackFailed(ex); }
             int index = Player.KeyframeIndex;
-            Children.Find<LabelWidget>("Ponder.Step").Text = m_failed ? Local("暂时无法打开教程，请重播", "Could not open the tutorial. Try replaying.")
-                : $"{index + 1} / {Player.Tutorial.Keyframes.Count}  ·  {Player.Tutorial.Keyframes[index].Title.Resolve(m_language)}";
+            Children.Find<LabelWidget>("Ponder.Step").Text = m_failed ? Local("ui.could_not_open_the_tutorial_try_replaying")
+                : RealmPonderLocalization.BuiltIn.Text("ui.step", index + 1, Player.Tutorial.Keyframes.Count, Player.Tutorial.Keyframes[index].Title.Resolve(m_language)).Resolve(m_language);
             m_buttons["Play"].Icon = Player.IsPaused || Player.IsCompleted ? RealmPonderIcon.Play : RealmPonderIcon.Pause;
             m_buttons["Previous"].IsEnabled = Player.State.Tick > 0;
             m_buttons["Next"].IsEnabled = index < Player.Tutorial.Keyframes.Count - 1;
@@ -77,21 +77,21 @@ namespace RealmEX.Presets.Ponder
             string hovered = m_buttons.FirstOrDefault(p => p.Value.IsHovered).Key;
             Children.Find<CanvasWidget>("Ponder.Tooltip").IsVisible = hovered != null;
             Children.Find<LabelWidget>("Ponder.TooltipText").Text = hovered == null ? "" : ButtonHint(hovered);
-            Children.Find<LabelWidget>("Ponder.Hint").Text = m_failed ? Local("暂时无法打开教程", "This tutorial could not be opened") : m_viewport.InspectMode
-                ? m_viewport.InspectedName ?? Local("指向方块查看 · 点击打开相关教程", "Point at a block · Click for related tutorials")
-                : hovered != null ? ButtonHint(hovered) : Player.IsCompleted ? Local("演示结束 · 可重播或继续下一个教程", "Finished · Replay or continue to the next tutorial")
-                : Player.State.Ui != null ? Local("拖动查看界面 · 空格暂停", "Drag to explore the interface · Space to pause")
-                : Local("拖动旋转 · 滚轮缩放 · 空格暂停", "Drag to rotate · Scroll to zoom · Space to pause");
+            Children.Find<LabelWidget>("Ponder.Hint").Text = m_failed ? Local("ui.this_tutorial_could_not_be_opened") : m_viewport.InspectMode
+                ? m_viewport.InspectedName ?? Local("ui.point_at_a_block_click_for_related")
+                : hovered != null ? ButtonHint(hovered) : Player.IsCompleted ? Local("ui.finished_replay_or_continue_to_the_next")
+                : Player.State.Ui != null ? Local("ui.drag_to_explore_the_interface_space_to")
+                : Local("ui.drag_to_rotate_scroll_to_zoom_space");
         }
         private string ButtonHint(string id) => id switch
         {
-            "Index" => Local("教程目录", "Tutorial index"), "Close" => Local("关闭", "Close"),
-            "PreviousScene" => Local("上一个教程", "Previous tutorial"), "NextScene" => Local("下一个教程", "Next tutorial"),
-            "Previous" => Local("上一步 · 左方向键", "Previous step · Left arrow"), "Next" => Local("下一步 · 右方向键", "Next step · Right arrow"),
-            "Play" => Player.IsPaused ? Local("继续 · 空格", "Resume · Space") : Local("暂停 · 空格", "Pause · Space"),
-            "Restart" => Local("从头重播", "Replay from the start"), "ResetView" => Local("恢复镜头", "Reset camera"),
-            "Inspect" => Local("查看方块与相关教程", "Inspect blocks and related tutorials"),
-            "Reading" => Local("舒适阅读：有文字时放慢播放", "Comfy reading: slow down while text is visible"), _ => ""
+            "Index" => Local("ui.tutorial_index"), "Close" => Local("ui.close"),
+            "PreviousScene" => Local("ui.previous_tutorial"), "NextScene" => Local("ui.next_tutorial"),
+            "Previous" => Local("ui.previous_step_left_arrow"), "Next" => Local("ui.next_step_right_arrow"),
+            "Play" => Player.IsPaused ? Local("ui.resume_space") : Local("ui.pause_space"),
+            "Restart" => Local("ui.replay_from_the_start"), "ResetView" => Local("ui.reset_camera"),
+            "Inspect" => Local("ui.inspect_blocks_and_related_tutorials"),
+            "Reading" => Local("ui.comfy_reading_slow_down_while_text_is"), _ => ""
         };
         public override void ChangeParent(ContainerWidget parentWidget)
         {

@@ -1,9 +1,0 @@
-{
-  "ContentWidgets": {
-    "RealmEXPonder": { "Open": "Ponder tutorials" }
-  },
-  "RealmEXPonder": {
-    "Unavailable": "Tutorials unavailable",
-    "UnavailableDetail": "Please close this window and try again."
-  }
-}

@@ -56,7 +56,7 @@ namespace RealmEX.Presets.Ponder
             if (state == null) return;
             m_cue.Content = Content; m_cue.Cue = state.Cue; m_cue.Tick = tick;
             m_cue.IsVisible = state.Cue != null && tick < state.Cue.StartTick + state.Cue.Duration;
-            m_title.Text = state.Definition.Title.Resolve(language) + (language.StartsWith("zh", StringComparison.OrdinalIgnoreCase) ? " · 操作演示" : " · Demonstration");
+            m_title.Text = RealmPonderLocalization.BuiltIn.Text("ui.demonstration_title", state.Definition.Title.Resolve(language)).Resolve(language);
             // Only pending edits need an extra layout for scripted clicks. The host lays out the visible tree each frame.
             if (m_applied < state.Edits.Count) Widget.LayoutWidgetsHierarchy(Content, state.Definition.Size);
             while (m_applied < state.Edits.Count) state.Edits[m_applied++](Content, language);

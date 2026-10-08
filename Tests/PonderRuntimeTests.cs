@@ -7,7 +7,9 @@ namespace RealmEX.Tests;
 public sealed class PonderRuntimeTests
 {
     private static readonly Point3 m_cell = new(0, 1, 0);
-    private static RealmPonderSceneBuilder Builder() => new("test:scene", new("场景", "Scene"), new(new Dictionary<Point3, int> { [m_cell] = 5 }));
+    private static readonly RealmPonderLocalization m_text = new(new Dictionary<string, string> {
+        ["en-US"] = """{"scene":"Scene","logic":"Logic"}""", ["zh-CN"] = """{"scene":"场景","logic":"逻辑"}""" });
+    private static RealmPonderSceneBuilder Builder() => new("test:scene", m_text.Text("scene"), new(new Dictionary<Point3, int> { [m_cell] = 5 }));
     [Fact]
     public void IdleDoesNotBlockConcurrentWorldCameraAndOverlayAnimations()
     {
@@ -92,7 +94,7 @@ public sealed class PonderRuntimeTests
     public void RegistrySharesOrderingBetweenIndexAndSubjectsAndRejectsDuplicateIds()
     {
         RealmPonderRegistry registry = new(); var tutorial = Builder().Idle(20).Build();
-        registry.RegisterTag(new("test:logic", new("逻辑", "Logic"), ""));
+        registry.RegisterTag(new("test:logic", m_text.Text("logic"), ""));
         registry.Register(tutorial, ["test:logic"], [5]);
         Assert.Single(registry.Search("逻辑", language: "zh-CN")); Assert.Single(registry.Search("Scene"));
         Assert.Empty(registry.Search("missing")); Assert.Same(tutorial, Assert.Single(registry.ForSubject(5)));
