@@ -68,5 +68,8 @@
   "ui.input.scroll": "Scroll",
   "ui.input.move": "Move",
   "ui.input.sneak": "Sneak + {0}",
-  "ui.input.item": "{0} · {1}"
+  "ui.input.item": "{0} · {1}",
+  "ui.previous_chapter": "Previous chapter",
+  "ui.next_chapter": "Next chapter",
+  "ui.index.series": "{0} · {1} chapters"
 }

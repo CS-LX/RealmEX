@@ -68,5 +68,8 @@
   "ui.input.scroll": "滚动",
   "ui.input.move": "移动",
   "ui.input.sneak": "潜行 + {0}",
-  "ui.input.item": "{0} · {1}"
+  "ui.input.item": "{0} · {1}",
+  "ui.previous_chapter": "上一章",
+  "ui.next_chapter": "下一章",
+  "ui.index.series": "{0} · {1} 章"
 }

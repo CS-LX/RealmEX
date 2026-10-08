@@ -110,6 +110,21 @@ public sealed class PonderRuntimeTests
         Assert.Equal(new Vector3(2, 0, 0), actor.Position); Assert.Equal(new Vector3(0, 45, 0), actor.Rotation);
     }
     [Fact]
+    public void ChapterSequenceStaysWithinItsSeriesAndUsesChapterOrder()
+    {
+        RealmPonderRegistry registry = new();
+        registry.RegisterSeries(new("test:reactor", "Reactor")); registry.RegisterSeries(new("test:other", "Other"));
+        RealmPonderTutorial Chapter(string id) => new RealmPonderSceneBuilder("test:" + id, id, new([])).Idle(20).Build();
+        registry.Register(Chapter("shutdown"), order: 3, series: "test:reactor");
+        registry.Register(Chapter("build"), order: 1, series: "test:reactor");
+        registry.Register(Chapter("hidden"), order: 2, series: "test:reactor", showInIndex: false);
+        registry.Register(Chapter("elsewhere"), series: "test:other"); registry.Register(Chapter("standalone"));
+        Assert.Equal(new[] { "test:build", "test:shutdown" }, registry.Sequence("test:build").Select(t => t.Id));
+        Assert.Equal(new[] { "test:build", "test:hidden", "test:shutdown" }, registry.Sequence("test:hidden").Select(t => t.Id));
+        Assert.Equal("test:standalone", Assert.Single(registry.Sequence("test:standalone")).Id);
+        Assert.Equal(2, registry.Search("Reactor").Count);
+    }
+    [Fact]
     public void ReconstructingRuntimeReceivesResetBeforeTimeZeroInstructions()
     {
         var tutorial = Builder().Idle(5).SetBlocks(new([m_cell]), 8).Idle(5).Build();

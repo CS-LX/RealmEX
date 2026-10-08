@@ -15,13 +15,18 @@ JavaScript 源文件使用 **`.pjs`** 后缀。宿主会无条件执行模组内
   <Tag Id="machines" Text="tag.machines" />
   <Ui Id="controller" Asset="Widgets/YourControllerWidget" Width="614" Height="382"
       Text="ui.controller" />
+  <Series Id="machines" Text="series.machines" Order="10" />
   <Tutorial Id="first_machine" Text="tutorial.first_machine"
       Script="first_machine.pjs" Schematic="first_machine.xml"
-      Tags="machines" Subjects="controller" Order="10" />
+      Tags="machines" Subjects="controller" Series="machines" Order="10" />
 </PonderPack>
 ```
 
 `Palette` 用宿主 `Block.GetCraftingId` / `GetCreativeValues` 解析物品，避免把工业动态分配的数值 ID 写死。`DataOffset` 用于同一设备的方向或状态差值；无偏移时省略。原版固定值也可以写 `Value`。`Subjects` 使用完整方块值，查询时按 crafting ID 匹配方向变体，不将共用 503 的不同工业设备混在一起。`Tags`、`Subjects` 以空格分隔；`Schematic` 可省略，用 JS 的 `fill` 构建结构。
+
+`Series` 为可进入的教程组，`Tutorial Series="machines"` 是组内独立章节。目录先列出教程组，再列出该组的章节；组与章节各按自己的 `Order` 排序。上一章/下一章不会跨组。无 `Series` 的独立教程仍可直接出现在目录。查询物品、标签和本地化标题也适用于组内章节，搜索组标题会匹配它的章节。
+
+每章必须独立恢复需要的地形、部件可见性及 UI 初始状态，不能依赖上一章的运行结果。可用 `Includes="machine.common.pjs other.common.pjs"` 在主 `Script` 前依次载入共用函数和初始化；路径同样受包内相对路径和 `.pjs` 限制。每章拥有新的 JS 环境，共用代码只复用源文件，不共享运行变量。全部 include 与主脚本共用一次编译的语句、内存和时间限制。`keyframe` 仅表示章内跳转步骤，不能代替独立章节。
 
 快照复用 `PonderSchematic Version="1"`，`Fill` 的 `Block` 指向清单调色板。`Ui` 复用内容模组原有机器 XML；由 C# 动态生成的库存/按钮可通过脚本显式补齐。
 
@@ -30,6 +35,7 @@ JavaScript 源文件使用 **`.pjs`** 后缀。宿主会无条件执行模组内
 ```json
 {
   "tag.machines": "Machines",
+  "series.machines": "Machine lessons",
   "ui.controller": "Controller",
   "tutorial.first_machine": "Your first machine",
   "step.base": "Build the base",

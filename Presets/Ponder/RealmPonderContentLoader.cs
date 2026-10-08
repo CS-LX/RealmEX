@@ -111,6 +111,7 @@ namespace RealmEX.Presets.Ponder
                     interfaces.Add(Required(ui, "Id"), RealmPonderUiDefinition.FromXml(Required(ui, "Asset"), Text(ui),
                         new(float.Parse(Required(ui, "Width"), CultureInfo.InvariantCulture), float.Parse(Required(ui, "Height"), CultureInfo.InvariantCulture))));
                 foreach (var tag in m_xml.Elements("Tag")) registry.RegisterTag(new(Id(Required(tag, "Id")), Text(tag), ""));
+                foreach (var series in m_xml.Elements("Series")) registry.RegisterSeries(new(Id(Required(series, "Id")), Text(series), (int?)series.Attribute("Order") ?? 0));
                 var tags = m_xml.Elements("Tag").Select(t => Required(t, "Id")).ToHashSet(StringComparer.Ordinal);
                 foreach (var tutorial in m_xml.Elements("Tutorial"))
                 {
@@ -120,13 +121,17 @@ namespace RealmEX.Presets.Ponder
                     var schematic = tutorial.Attribute("Schematic") is { } source
                         ? RealmPonderSchematic.Load(ParseXml(m_read(Resource(source.Value))), id => palette[id]) : new RealmPonderSchematic([]);
                     var builder = new RealmPonderSceneBuilder(Id(Required(tutorial, "Id")), Text(tutorial), schematic);
-                    RealmPonderScript.Compile(builder, m_read(script), script, palette, interfaces, localization);
+                    var includes = ((string)tutorial.Attribute("Includes") ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(Resource).ToArray();
+                    if (includes.Any(path => !path.EndsWith(".pjs", StringComparison.Ordinal))) throw new FormatException("Ponder includes must use .pjs.");
+                    string sourceCode = string.Join("\n", includes.Append(script).Select(m_read));
+                    RealmPonderScript.Compile(builder, sourceCode, script, palette, interfaces, localization);
                     RealmPonderTutorial result = builder.Build();
                     new RealmPonderPlayer(result).Seek(result.Duration); // Validate section/UI ordering before publishing the pack.
                     string[] tutorialTags = ((string)tutorial.Attribute("Tags") ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
                     if (tutorialTags.Any(t => !tags.Contains(t))) throw new FormatException("Tutorial references an unknown tag.");
                     int[] subjects = ((string)tutorial.Attribute("Subjects") ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(id => palette[id]).ToArray();
-                    registry.Register(result, tutorialTags.Select(Id), subjects, (int?)tutorial.Attribute("Order") ?? 0, (bool?)tutorial.Attribute("ShowInIndex") ?? true);
+                    registry.Register(result, tutorialTags.Select(Id), subjects, (int?)tutorial.Attribute("Order") ?? 0, (bool?)tutorial.Attribute("ShowInIndex") ?? true,
+                        tutorial.Attribute("Series") is { } series ? Id(series.Value) : null);
                 }
                 if (!m_xml.Elements("Tutorial").Any()) throw new FormatException("A Ponder pack must contain at least one tutorial.");
             }

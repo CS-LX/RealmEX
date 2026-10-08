@@ -30,7 +30,7 @@ namespace RealmEX.Presets.Ponder
         {
             m_registry = registry ?? new();
             if (registry == null) m_registry.Register(tutorial);
-            m_sequence = sequence ?? m_registry.Search().Select(e => e.Tutorial).ToArray();
+            m_sequence = m_registry.Sequence(tutorial.Id, sequence);
             HorizontalAlignment = VerticalAlignment = WidgetAlignment.Stretch;
             LoadContents(this, ContentManager.Get<XElement>("Dialogs/RealmPonderDialog"));
             m_viewport = Children.Find<RealmPonderWidget>("Ponder.Viewport");
@@ -55,6 +55,9 @@ namespace RealmEX.Presets.Ponder
             CleanupRealm(); m_failed = false;
             Player = new(tutorial) { ComfyReading = comfy }; m_timeline.Player = Player;
             m_viewport.InspectMode = false; m_viewport.Setup(null, Player);
+            m_sequence = m_registry.Sequence(tutorial.Id, m_sequence);
+            string series = m_registry.Entry(tutorial.Id).SeriesId;
+            Children.Find<LabelWidget>("Ponder.Brand").Text = series == null ? Local("ui.ponder") : m_registry.GetSeries(series).Title.Resolve(m_language);
             Children.Find<LabelWidget>("Ponder.Title").Text = tutorial.Title.Resolve(m_language);
             RefreshPresentation();
         }
@@ -86,7 +89,8 @@ namespace RealmEX.Presets.Ponder
         private string ButtonHint(string id) => id switch
         {
             "Index" => Local("ui.tutorial_index"), "Close" => Local("ui.close"),
-            "PreviousScene" => Local("ui.previous_tutorial"), "NextScene" => Local("ui.next_tutorial"),
+            "PreviousScene" => Local(m_registry.Entry(TutorialId).SeriesId == null ? "ui.previous_tutorial" : "ui.previous_chapter"),
+            "NextScene" => Local(m_registry.Entry(TutorialId).SeriesId == null ? "ui.next_tutorial" : "ui.next_chapter"),
             "Previous" => Local("ui.previous_step_left_arrow"), "Next" => Local("ui.next_step_right_arrow"),
             "Play" => Player.IsPaused ? Local("ui.resume_space") : Local("ui.pause_space"),
             "Restart" => Local("ui.replay_from_the_start"), "ResetView" => Local("ui.reset_camera"),
@@ -188,10 +192,11 @@ namespace RealmEX.Presets.Ponder
             bool paused = Player.IsPaused; Player.IsPaused = true;
             m_index = new(m_registry, tutorial =>
             {
-                m_sequence = subjects ?? m_registry.Search().Select(e => e.Tutorial).ToArray();
+                m_sequence = m_registry.Sequence(tutorial.Id, subjects);
                 SelectTutorial(tutorial);
-            }, () => { m_index = null; Player.IsPaused = paused; }, subjects);
+            }, () => { m_index = null; IsVisible = !IsClosed; Player.IsPaused = paused; }, subjects, subjects == null ? m_registry.Entry(TutorialId).SeriesId : null);
             DialogsManager.ShowDialog(ParentWidget ?? throw new InvalidOperationException("The tutorial must be attached before opening its index."), m_index);
+            IsVisible = false;
         }
         public void Close()
         {

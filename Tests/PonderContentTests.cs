@@ -94,6 +94,32 @@ public sealed class PonderContentTests
         Assert.Throws<FormatException>(() => RealmPonderContentLoader.Load(registry, "Ponder/content.ponder.xml", Manifest.Replace("machine.pjs", path), path => Read(path, Script), _ => 3));
         Assert.Empty(registry.Search());
     }
+    [Fact]
+    public void SeriesLoadIndependentChaptersWithSharedScriptIncludes()
+    {
+        string manifest = Manifest.Replace("<Tutorial", "<Series Id='course' Text='building'/><Tutorial Series='course' Includes='common.pjs'", StringComparison.Ordinal)
+            .Replace("</PonderPack>", "<Tutorial Id='second' Text='move' Script='second.pjs' Includes='common.pjs' Series='course' Order='1'/></PonderPack>");
+        var registry = new RealmPonderRegistry();
+        RealmPonderContentLoader.Load(registry, "Ponder/content.ponder.xml", manifest,
+            path => path.EndsWith(".json") ? Read(path, "") : path.EndsWith("common.pjs")
+                ? "let counter = 0; function build() { scene.fill([0,1,0],[0,1,0], ++counter); scene.idle(20); }" : "build();", _ => 3);
+        Assert.Equal("example:course", Assert.Single(registry.Series).Id);
+        Assert.Equal(new[] { "example:machine", "example:second" }, registry.Sequence("example:machine").Select(t => t.Id));
+        foreach (var entry in registry.Search("建造", language: "zh-CN"))
+            Assert.Equal(1, new RealmPonderPlayer(entry.Tutorial).State.Blocks[new(0, 1, 0)]);
+        Assert.Equal(2, registry.Search("建造", language: "zh-CN").Count);
+    }
+    [Theory]
+    [InlineData("Series='missing'")]
+    [InlineData("Includes='../common.pjs'")]
+    [InlineData("Includes='common.js'")]
+    public void InvalidChapterReferencesRollBackTheSeries(string attributes)
+    {
+        var registry = new RealmPonderRegistry();
+        string manifest = Manifest.Replace("<Tutorial", "<Series Id='course' Text='building'/><Tutorial " + attributes, StringComparison.Ordinal);
+        Assert.ThrowsAny<Exception>(() => RealmPonderContentLoader.Load(registry, "Ponder/content.ponder.xml", manifest, path => Read(path, Script), _ => 3));
+        Assert.Empty(registry.Series); Assert.Empty(registry.Search()); Assert.Empty(registry.Tags);
+    }
     sealed class DeviceBlock : AirBlock
     {
         public override string GetCraftingId(int value) => "device-" + (Terrain.ExtractData(value) >> 3);

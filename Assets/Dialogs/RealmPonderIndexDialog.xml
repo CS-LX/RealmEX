@@ -2,7 +2,8 @@
   <RectangleWidget FillColor="0,0,0,96" OutlineColor="0,0,0,0" IsHitTestVisible="False" />
   <StackPanelWidget Direction="Vertical" Margin="20,16">
     <CanvasWidget Name="Index.Header" Size="-1,56">
-      <LabelWidget Name="Index.Title" FontScale="1" VerticalAlignment="Center" />
+      <p:RealmPonderButtonWidget Name="Index.Back" Icon="PreviousKeyframe" HorizontalAlignment="Near" VerticalAlignment="Center" IsVisible="False" />
+      <LabelWidget Name="Index.Title" FontScale="1" VerticalAlignment="Center" WordWrap="True" />
       <p:RealmPonderButtonWidget Name="Index.Close" Icon="Close" HorizontalAlignment="Far" VerticalAlignment="Center" />
     </CanvasWidget>
     <LabelWidget Name="Index.SearchLabel" FontScale="1" Margin="0,8" />
