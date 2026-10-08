@@ -34,7 +34,7 @@ namespace RealmEX.Presets.Ponder
             {
                 var tutorial = (RealmPonderTutorial)item;
                 CanvasWidget row = new() { IsHitTestVisible = false };
-                row.Children.Add(new RectangleWidget { Size = new(float.PositiveInfinity, 1), FillColor = new(44, 59, 79), OutlineColor = Color.Transparent, VerticalAlignment = WidgetAlignment.Far, IsHitTestVisible = false });
+                row.Children.Add(new RectangleWidget { Size = new(float.PositiveInfinity, 1), FillColor = new(24, 24, 24, 24), OutlineColor = Color.Transparent, VerticalAlignment = WidgetAlignment.Far, IsHitTestVisible = false });
                 var subjects = registry.Entry(tutorial.Id).Subjects;
                 if (subjects.Count > 0) row.Children.Add(new BlockIconWidget { Value = Terrain.MakeBlockValue(subjects[0], 15, 0), Size = new(56), Margin = new(8, 4), HorizontalAlignment = WidgetAlignment.Near, VerticalAlignment = WidgetAlignment.Center });
                 row.Children.Add(new LabelWidget { Text = tutorial.Title.Resolve(m_language), FontScale = 1, WordWrap = true, Margin = new(subjects.Count > 0 ? 76 : 12, 6), VerticalAlignment = WidgetAlignment.Center, IsHitTestVisible = false });
@@ -43,8 +43,8 @@ namespace RealmEX.Presets.Ponder
             m_scenes.ItemClicked = item => { m_selected((RealmPonderTutorial)item); Close(); };
             var tags = Children.Find<ListPanelWidget>("Index.Tags");
             tags.ScrollPosition = 0; tags.ScrollSpeed = 0;
-            tags.SelectionColor = new(43, 65, 86);
-            m_scenes.SelectionColor = new(43, 65, 86);
+            tags.SelectionColor = new(24, 24, 24, 24);
+            m_scenes.SelectionColor = new(24, 24, 24, 24);
             tags.AddItem(new RealmPonderTag("", new("全部", "All"), ""));
             tags.AddItems(registry.Tags.Cast<object>());
             tags.SelectedIndex = 0;

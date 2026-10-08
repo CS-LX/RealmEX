@@ -1,0 +1,8 @@
+Remix Icon v4.6.0 — Copyright Remix Design and contributors.
+https://github.com/Remix-Design/RemixIcon/tree/v4.6.0
+Licensed under Apache License 2.0; see RemixIcon.LICENSE.txt.
+
+Original SVGs are retained in tools/icons/remix.
+RealmEX converts their currentColor fill to white and rasterizes at 72 x 72
+for display at 24 x 24 logical pixels. Shapes are unchanged.
+Regeneration: install resvg-py, then run python tools/icons/render.py.

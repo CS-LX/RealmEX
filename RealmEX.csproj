@@ -86,6 +86,8 @@
 		<Compile Include="Properties\AssemblyInfo.cs" />
 	</ItemGroup>
 	<ItemGroup>
+		<None Update="Assets\RealmEX\Icons\*.png"><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory></None>
+		<None Update="ThirdParty\RemixIcon.*.txt"><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory></None>
 		<None Update="Assets\Dialogs\RealmPonderDialog.xml">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>

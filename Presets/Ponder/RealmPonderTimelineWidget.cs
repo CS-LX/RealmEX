@@ -26,10 +26,10 @@ namespace RealmEX.Presets.Ponder
             if (Player == null) return;
             var batch = dc.PrimitivesRenderer2D.FlatBatch(); int start = batch.TriangleVertices.Count;
             float width = Math.Max(1, ActualSize.X - 16), y = ActualSize.Y / 2;
-            Color accent = new Color(158, 199, 234) * GlobalColorTransform;
-            batch.QueueQuad(new(8, y - 2), new(8 + width, y + 2), 0, new Color(65, 81, 104) * GlobalColorTransform);
+            Color accent = new Color(200, 200, 200, 200) * GlobalColorTransform;
+            batch.QueueQuad(new(8, y - 1), new(8 + width, y + 1), 0, new Color(48, 48, 48, 48) * GlobalColorTransform);
             float current = 8 + width * Player.State.Tick / Player.Tutorial.Duration;
-            batch.QueueQuad(new(8, y - 2), new(current, y + 2), 0, accent);
+            batch.QueueQuad(new(8, y - 1), new(current, y + 1), 0, accent);
             foreach (var keyframe in Player.Tutorial.Keyframes)
             {
                 float x = 8 + width * keyframe.Tick / Player.Tutorial.Duration;

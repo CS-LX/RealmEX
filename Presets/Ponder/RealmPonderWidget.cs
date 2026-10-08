@@ -13,16 +13,15 @@ namespace RealmEX.Presets.Ponder
     {
         private sealed class Callout : CanvasWidget
         {
-            public readonly LabelWidget Label = new() { WordWrap = true, FontScale = 1, Color = new(229, 236, 245), IsHitTestVisible = false };
+            public readonly LabelWidget Label = new() { WordWrap = true, FontScale = 1, Color = Color.White, IsHitTestVisible = false };
             public readonly ScrollPanelWidget Scroll = new() { Direction = LayoutDirection.Vertical, Margin = new(14, 10), ScrollPosition = 0, ScrollSpeed = 0 };
-            public readonly RectangleWidget Accent = new() { Size = new(3, float.PositiveInfinity), FillColor = new(158, 199, 234), OutlineColor = Color.Transparent, HorizontalAlignment = WidgetAlignment.Near, IsHitTestVisible = false };
             public RealmPonderOverlay Overlay;
             public BlockIconWidget Item;
             public Callout()
             {
                 IsHitTestVisible = false;
-                Children.Add(new RectangleWidget { FillColor = new(22, 30, 43, 242), OutlineColor = new(59, 77, 99), IsHitTestVisible = false });
-                Children.Add(Accent); Scroll.Children.Add(Label); Children.Add(Scroll);
+                Children.Add(new RectangleWidget { FillColor = new(0, 0, 0, 180), OutlineColor = Color.Transparent, IsHitTestVisible = false });
+                Scroll.Children.Add(Label); Children.Add(Scroll);
             }
         }
         private readonly Dictionary<string, Callout> m_callouts = new(StringComparer.Ordinal);
@@ -71,7 +70,7 @@ namespace RealmEX.Presets.Ponder
                     if (callout.Item != null) { callout.Item.IsVisible = overlay.ItemValue != 0; if (overlay.ItemValue != 0) callout.Item.Value = Terrain.ReplaceLight(overlay.ItemValue, 15); }
                     callout.Scroll.Margin = new(overlay.ItemValue == 0 ? 14 : 40, 10);
                 }
-                callout.Label.Text = text; callout.Accent.FillColor = overlay.Color;
+                callout.Label.Text = text;
                 callout.ColorTransform = Color.White * overlay.Opacity(Player.State.Tick);
                 callout.IsVisible = !InspectMode;
             }

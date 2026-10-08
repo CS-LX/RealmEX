@@ -1,5 +1,7 @@
 # Ponder 对齐与接入
 
+界面现采用 RecipaediaEX 同类的半透明黑底、白灰文字和无描边按钮。控制栏使用 Remix Icon v4.6.0 的 12 个图标，来源、修改说明与许可证见 `ThirdParty/`，原始 SVG 及再生成脚本见 `tools/icons/`。本轮通过 22 项逻辑/布局测试与真实引擎的 39 张中英文预览及交互检查；预览输出位于忽略目录 `artifacts/ponder-flat-preview/`。
+
 本轮以 [Creators-of-Create/Ponder](https://github.com/Creators-of-Create/Ponder) 的 `mc1.21.1/dev` 分支、提交 [`89819291b726708d119b118dea01667eae0b64c9`](https://github.com/Creators-of-Create/Ponder/tree/89819291b726708d119b118dea01667eae0b64c9) 为对照。日期：2026-10-08。对照的是教程编排、播放、展示和扩展机制；SC 的字体、方块模型和输入方式沿用宿主。
 
 ## 原来的主要差距
