@@ -3,10 +3,12 @@
   <CanvasWidget Name="Ponder.Frame" HorizontalAlignment="Center" VerticalAlignment="Center">
   <StackPanelWidget Name="Ponder.Content" Direction="Vertical">
     <CanvasWidget Name="Ponder.Header" Size="-1,88">
-      <StackPanelWidget Name="Ponder.Heading" Direction="Vertical" HorizontalAlignment="Near" VerticalAlignment="Center">
+      <CanvasWidget Name="Ponder.HeadingFrame" HorizontalAlignment="Near" VerticalAlignment="Center">
+      <StackPanelWidget Name="Ponder.Heading" Direction="Vertical">
         <LabelWidget Name="Ponder.Brand" Color="140,140,140,140" FontScale="1" />
         <LabelWidget Name="Ponder.Title" Color="255,255,255" FontScale="1" WordWrap="True" Margin="0,4" />
       </StackPanelWidget>
+      </CanvasWidget>
       <StackPanelWidget Direction="Horizontal" HorizontalAlignment="Far" VerticalAlignment="Center">
         <p:RealmPonderButtonWidget Name="Ponder.Index" Icon="Index" Margin="2,0" />
         <p:RealmPonderButtonWidget Name="Ponder.Close" Icon="Close" Margin="2,0" />

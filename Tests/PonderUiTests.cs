@@ -48,4 +48,27 @@ public sealed class PonderUiTests
         player.Seek(20); view.Synchronize(player.State.Ui, player.State.Tick, "en-US"); Assert.Equal(1f, ((Machine)view.Content).Meter.Value);
         player.Seek(25); view.Synchronize(player.State.Ui, player.State.Tick, "en-US"); Assert.Null(view.Content); Assert.False(view.IsVisible);
     }
+    [Fact]
+    public void ScriptConfiguresOnlyTheNamedNestedWidgetAndReplaysItsInstanceProperties()
+    {
+        CanvasWidget Create() {
+            CanvasWidget root = new();
+            foreach (string name in new[] { "Left", "Right" }) {
+                CanvasWidget panel = new() { Name = name };
+                panel.Children.Add(new ValueBarWidget { Name = "Meter" }); root.Children.Add(panel);
+            }
+            return root;
+        }
+        var builder = new RealmPonderSceneBuilder("test:configure", "Configure", new([]));
+        RealmPonderScript.Compile(builder, "scene.uiShow('machine'); scene.idle(10); scene.uiConfigure('Right/Meter', {Value:'0.75', Margin:'2, 3'}); scene.idle(10);",
+            "configure.pjs", new Dictionary<string, int>(), new Dictionary<string, RealmPonderUiDefinition> { ["machine"] = new("Machine", new(614, 382), Create) });
+        var player = new RealmPonderPlayer(builder.Build());
+        using var view = new RealmPonderUiWidget();
+        player.Seek(15); view.Synchronize(player.State.Ui, player.State.Tick, "en-US");
+        ValueBarWidget Meter(string panel) => view.Content.Children.Find<CanvasWidget>(panel).Children.Find<ValueBarWidget>("Meter");
+        Assert.Equal(.75f, Meter("Right").Value); Assert.Equal(new Vector2(2, 3), Meter("Right").Margin);
+        Assert.Equal(0f, Meter("Left").Value);
+        player.Seek(5); view.Synchronize(player.State.Ui, player.State.Tick, "en-US"); Assert.Equal(0f, Meter("Right").Value);
+        player.Seek(15); view.Synchronize(player.State.Ui, player.State.Tick, "en-US"); Assert.Equal(.75f, Meter("Right").Value);
+    }
 }

@@ -61,10 +61,15 @@ scene.uiHide();
 | `uiText` / `uiFont` / `uiButtonColor` | target, text / target, fontAsset / target, RGB |
 | `uiEnabled` / `uiVisible` / `uiValue` | target, value |
 | `uiAnimateValue` | target, from, to, duration |
+| `uiConfigure` | target, 属性对象（值使用 XML 格式的字符串） |
 | `uiInventory` / `uiItem` | grid / slot, paletteIdOrValue, count |
 | `uiButton` | grid, name, text, column, row, [width,height] |
 | `uiPoint` / `uiClick` | target, duration |
 | `uiDrag` / `uiScroll` | fromTarget, toTarget, duration / target, absolutePosition, duration |
+
+目标可以用 `/` 限定控件路径，例如 `RunButton/BevelledButton.Canvas`。`uiConfigure` 通过宿主原有 XML 属性加载器设置当前独立实例，可补齐原机器构造器中的边距、字号及自定义量表阈值，例如 `scene.uiConfigure('TemperatureBar', { WarningValue: '0.73' })`。不修改原机器的控件实现或资源默认值。
+
+工业启用 AMPK 时，XML 枚举由加密资源加载器接管。将整套内容放在 `Assets/Ponder/`，让清单、脚本和快照一起通过原模组资源管线加载；不要把清单留在受该管线屏蔽的包根目录。
 
 JS 可以用函数、循环、条件、数组、计算等组织演出和附加逻辑。它在独立 Jint 实例中编译为时间轴，不使用宿主全局 JS 引擎，不暴露 CLR、玩家 Project、文件系统或网络；`Math.random` 为可重复序列，`Date` 不可用。脚本限制为 100,000 条语句、10,000 条演出指令、16 MiB JS 分配及 3 秒编译时间；单个资源小于 1 MiB，教程最多 20 分钟。编译完即释放 JS 引擎，回放执行已编排的动作，不能保留任意 JS 对象去修改主世界。
 

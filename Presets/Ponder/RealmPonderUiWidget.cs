@@ -12,7 +12,8 @@ namespace RealmEX.Presets.Ponder
         private readonly CanvasWidget m_surface = new();
         private readonly CanvasWidget m_scrollFrame = new();
         private readonly CanvasWidget m_horizontalFrame = new();
-        private readonly LabelWidget m_title = new() { FontScale = 1, IsHitTestVisible = false };
+        private readonly CanvasWidget m_titleFrame = new();
+        private readonly LabelWidget m_title = new() { FontScale = 1, WordWrap = true, IsHitTestVisible = false };
         private readonly ScrollPanelWidget m_vertical = new() { Direction = LayoutDirection.Vertical, ScrollPosition = 0, ScrollSpeed = 0, IsUpdateEnabled = false };
         private readonly ScrollPanelWidget m_horizontal = new() { Direction = LayoutDirection.Horizontal, ScrollPosition = 0, ScrollSpeed = 0, IsUpdateEnabled = false };
         private readonly CueWidget m_cue = new() { IsHitTestVisible = false };
@@ -26,7 +27,7 @@ namespace RealmEX.Presets.Ponder
         {
             ClampToBounds = true;
             Children.Add(new RectangleWidget { FillColor = new(0, 0, 0, 160), OutlineColor = Color.Transparent, IsHitTestVisible = false });
-            Children.Add(m_title); Children.Add(m_scrollFrame); m_scrollFrame.Children.Add(m_vertical);
+            Children.Add(m_titleFrame); m_titleFrame.Children.Add(m_title); Children.Add(m_scrollFrame); m_scrollFrame.Children.Add(m_vertical);
             m_vertical.Children.Add(m_horizontalFrame); m_horizontalFrame.Children.Add(m_horizontal); m_horizontal.Children.Add(m_surface);
         }
         public void Synchronize(RealmPonderUiState state, int tick, string language)
@@ -71,13 +72,22 @@ namespace RealmEX.Presets.Ponder
                 if (click != null) click.IsPressed = cue.Progress(tick) is > 0.35f and < 0.7f;
             }
         }
-        internal static Widget Find(CanvasWidget root, string name) => root.Name == name ? root : root.Children.Find<Widget>(name, true);
+        internal static Widget Find(CanvasWidget root, string name)
+        {
+            Widget current = root;
+            foreach (string segment in name.Split('/'))
+                current = current.Name == segment ? current : (current as ContainerWidget)?.Children.Find<Widget>(segment, true)
+                    ?? throw new InvalidOperationException($"UI target '{name}' was not found.");
+            return current;
+        }
         public override void MeasureOverride(Vector2 available)
         {
             if (m_state == null) { base.MeasureOverride(available); return; }
             Vector2 size = Vector2.Min(Size, available);
-            m_title.Size = new(size.X - 24, 32); SetWidgetPosition(m_title, new(12, 4));
-            m_scrollFrame.Size = new(size.X, Math.Max(1, size.Y - 40)); SetWidgetPosition(m_scrollFrame, new(0, 40));
+            m_titleFrame.Size = new(size.X - 24, -1); SetWidgetPosition(m_titleFrame, new(12, 4));
+            m_titleFrame.Measure(new(size.X - 24, float.PositiveInfinity));
+            float headingHeight = Math.Max(40, m_titleFrame.ParentDesiredSize.Y + 8);
+            m_scrollFrame.Size = new(size.X, Math.Max(1, size.Y - headingHeight)); SetWidgetPosition(m_scrollFrame, new(0, headingHeight));
             m_horizontalFrame.Size = new(size.X, m_state.Definition.Size.Y);
             m_surface.Size = m_state.Definition.Size;
             base.MeasureOverride(available); IsDrawRequired = true;

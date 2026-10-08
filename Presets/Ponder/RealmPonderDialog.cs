@@ -99,6 +99,11 @@ namespace RealmEX.Presets.Ponder
             float width = Math.Max(1, Math.Min(1200, available.X - 32));
             float height = Math.Max(1, available.Y - 24);
             float headerHeight = height < 520 ? 64 : 88;
+            var heading = Children.Find<CanvasWidget>("Ponder.HeadingFrame");
+            heading.Size = new(Math.Max(1, width - 112), -1);
+            Children.Find<LabelWidget>("Ponder.Brand").IsVisible = height >= 520;
+            heading.Measure(new(heading.Size.X, float.PositiveInfinity));
+            headerHeight = Math.Max(headerHeight, heading.ParentDesiredSize.Y + 12);
             Children.Find<CanvasWidget>("Ponder.Frame").Size = new(width, height);
             Children.Find<CanvasWidget>("Ponder.Header").Size = new(width, headerHeight);
             Children.Find<LabelWidget>("Ponder.Brand").IsVisible = height >= 520;

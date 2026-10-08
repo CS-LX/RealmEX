@@ -131,7 +131,23 @@ namespace RealmEX.Presets.Ponder
             Vector3 position = s.CameraTarget + new Vector3(MathF.Sin(yaw) * distance * MathF.Cos(pitch), distance * MathF.Sin(pitch), MathF.Cos(yaw) * distance * MathF.Cos(pitch));
             float height = Math.Max(s.ViewHeight, 7f * size.Y / size.X) * m_zoom;
             float offset = size.X >= 850 ? 0.04f : size.X > size.Y ? 0.18f : 0;
+            bool besideUi = m_ui != null && size.X >= 1000;
+            float captionSpace = 0;
+            if (besideUi)
+            {
+                float sceneWidth = Math.Max(1, size.X - s.Ui.Definition.Size.X - 48);
+                captionSpace = m_callouts.Values.Select(c => c.Size.Y + 24).DefaultIfEmpty(0).Max();
+                float sceneHeight = Math.Max(80, size.Y - captionSpace - 16);
+                height = Math.Max(s.ViewHeight, Math.Max(10 * size.Y / sceneWidth, 7 * size.Y / sceneHeight)) * m_zoom;
+                offset = (16 + sceneWidth / 2) / size.X - 0.5f;
+            }
             Vector3 shift = Vector3.Normalize(Vector3.Cross(s.CameraTarget - position, Vector3.UnitY)) * (height * size.X / size.Y * offset);
+            if (besideUi)
+            {
+                Vector3 right = Vector3.Normalize(Vector3.Cross(s.CameraTarget - position, Vector3.UnitY));
+                Vector3 up = Vector3.Normalize(Vector3.Cross(right, s.CameraTarget - position));
+                shift -= up * (height * captionSpace / (2 * size.Y));
+            }
             Vector3 target = s.CameraTarget - shift; position -= shift;
             m_viewProjection = Matrix.CreateLookAt(position, target, Vector3.UnitY) * Matrix.CreateOrthographic(height * size.X / size.Y, height, 0.1f, 1000);
             if (Realm != null) { Realm.Viewport.LookTarget = target; Realm.Viewport.LookPosition = position; Realm.Viewport.OrthographicWorldHeight = height; }

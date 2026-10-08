@@ -62,6 +62,10 @@ namespace RealmEX.Presets.Ponder
                     case "uiEnabled": builder.UiEnabled(S(0), B(1)); break;
                     case "uiVisible": builder.UiVisible(S(0), B(1)); break;
                     case "uiValue": builder.UiValue(S(0), F(1)); break;
+                    case "uiConfigure":
+                        Dictionary<string, string> properties = new(StringComparer.Ordinal);
+                        foreach (var property in args[1].EnumerateObject()) properties.Add(property.Name, property.Value.GetString());
+                        builder.UiConfigure(S(0), properties); break;
                     case "uiAnimateValue": builder.UiAnimateValue(S(0), F(1), F(2), T(3)); break;
                     case "uiInventory": builder.UiInventory(S(0)); break;
                     case "uiItem": builder.UiItem(S(0), Value(1), I(2)); break;
@@ -79,7 +83,7 @@ namespace RealmEX.Presets.Ponder
                     const emit = __emit;
                     delete globalThis.__emit;
                     const api = {};
-                    for (const op of ['idle','keyframe','camera','rotateCamera','section','show','hide','move','rotate','fill','restore','text','outline','line','removeOverlay','item','moveItem','removeItem','success','finish','uiShow','uiHide','uiText','uiFont','uiButtonColor','uiEnabled','uiVisible','uiValue','uiAnimateValue','uiInventory','uiItem','uiButton','uiPoint','uiClick','uiDrag','uiScroll'])
+                    for (const op of ['idle','keyframe','camera','rotateCamera','section','show','hide','move','rotate','fill','restore','text','outline','line','removeOverlay','item','moveItem','removeItem','success','finish','uiShow','uiHide','uiText','uiFont','uiButtonColor','uiEnabled','uiVisible','uiValue','uiConfigure','uiAnimateValue','uiInventory','uiItem','uiButton','uiPoint','uiClick','uiDrag','uiScroll'])
                         api[op] = (...args) => emit(JSON.stringify({op, args}));
                     let seed = 1;
                     Math.random = () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 4294967296; };

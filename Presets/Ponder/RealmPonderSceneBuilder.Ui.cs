@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 using Engine;
 using Game;
 
@@ -27,6 +29,18 @@ namespace RealmEX.Presets.Ponder
         public RealmPonderSceneBuilder UiEnabled(string target, bool enabled) => UiEdit((root, _) => RealmPonderUiWidget.Find(root, target).IsEnabled = enabled);
         public RealmPonderSceneBuilder UiVisible(string target, bool visible) => UiEdit((root, _) => RealmPonderUiWidget.Find(root, target).IsVisible = visible);
         public RealmPonderSceneBuilder UiValue(string target, float value) => UiEdit((root, _) => SetValue(root, target, value));
+        /// <summary>Replays XML-style instance properties, including properties supplied by an optional content mod.</summary>
+        public RealmPonderSceneBuilder UiConfigure(string target, IReadOnlyDictionary<string, string> properties)
+        {
+            XElement configuration = new("Widget");
+            foreach (var property in properties)
+            {
+                if (string.IsNullOrEmpty(property.Key) || property.Key.Any(c => !char.IsAsciiLetterOrDigit(c) && c != '_'))
+                    throw new ArgumentException("Only plain widget properties are supported.", nameof(properties));
+                configuration.Add(new XAttribute(property.Key, property.Value));
+            }
+            return UiEdit((root, _) => RealmPonderUiWidget.Find(root, target).LoadProperties(root, configuration));
+        }
         public RealmPonderSceneBuilder UiFont(string target, string asset) => UiEdit((root, _) =>
         {
             var font = ContentManager.Get<Engine.Media.BitmapFont>(asset);
