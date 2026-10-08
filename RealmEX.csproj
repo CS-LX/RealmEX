@@ -72,6 +72,10 @@
 		<Compile Include="Presets\Ponder\RealmPonderSchematic.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderState.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderSceneBuilder.cs" />
+		<Compile Include="Presets\Ponder\RealmPonderSceneBuilder.Ui.cs" />
+		<Compile Include="Presets\Ponder\RealmPonderUi.cs" />
+		<Compile Include="Presets\Ponder\RealmPonderUiWidget.cs" />
+		<Compile Include="Presets\Ponder\RealmPonderUiInventory.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderRegistry.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderActor.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderSession.cs" />

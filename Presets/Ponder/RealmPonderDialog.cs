@@ -61,7 +61,8 @@ namespace RealmEX.Presets.Ponder
         }
         public void RefreshPresentation()
         {
-            m_viewport.RefreshPresentation();
+            try { m_viewport.RefreshPresentation(); }
+            catch (Exception ex) { PlaybackFailed(ex); }
             int index = Player.KeyframeIndex;
             Children.Find<LabelWidget>("Ponder.Step").Text = m_failed ? Local("暂时无法打开教程，请重播", "Could not open the tutorial. Try replaying.")
                 : $"{index + 1} / {Player.Tutorial.Keyframes.Count}  ·  {Player.Tutorial.Keyframes[index].Title.Resolve(m_language)}";
@@ -80,6 +81,7 @@ namespace RealmEX.Presets.Ponder
             Children.Find<LabelWidget>("Ponder.Hint").Text = m_failed ? Local("暂时无法打开教程", "This tutorial could not be opened") : m_viewport.InspectMode
                 ? m_viewport.InspectedName ?? Local("指向方块查看 · 点击打开相关教程", "Point at a block · Click for related tutorials")
                 : hovered != null ? ButtonHint(hovered) : Player.IsCompleted ? Local("演示结束 · 可重播或继续下一个教程", "Finished · Replay or continue to the next tutorial")
+                : Player.State.Ui != null ? Local("拖动查看界面 · 空格暂停", "Drag to explore the interface · Space to pause")
                 : Local("拖动旋转 · 滚轮缩放 · 空格暂停", "Drag to rotate · Scroll to zoom · Space to pause");
         }
         private string ButtonHint(string id) => id switch

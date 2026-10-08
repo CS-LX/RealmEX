@@ -60,6 +60,7 @@ Window.Frame += () => {
         foreach (string language in new[] { "zh-CN", "en-US" }) {
             LanguageControl.CurrentLanguageName = language;
             LanguageControl.jsonNode = System.Text.Json.Nodes.JsonNode.Parse(ContentManager.Get<System.Text.Json.JsonDocument>("Lang/" + language).RootElement.GetRawText());
+            VerifyMachineUi(language);
             var registry = RealmPonderSamples.CreateRegistry();
             foreach (var tutorial in registry.Search().Select(e => e.Tutorial)) {
                 var dialog = new RealmPonderDialog(tutorial, registry);
@@ -97,6 +98,46 @@ void Save(Widget widget, int width, int height, string name) {
     RenderTarget2D.Save(target, Path.Combine(output, name + ".png"), ImageFileFormat.Png, true);
     Display.RenderTarget = null;
     rootWidget.Children.Remove(widget);
+}
+
+void VerifyMachineUi(string language) {
+    var builder = new RealmPonderSceneBuilder("preview:machine_ui", new("熔炉界面演示", "Using the furnace"), new([]));
+    builder.ShowUi(RealmPonderUiDefinition.FromXml("Widgets/FurnaceWidget", new("熔炉", "Furnace"), new(614, 382)))
+        .UiInventory("InventoryGrid").UiInventory("FurnaceGrid")
+        .UiItem("InventoryGrid.0", PlanksBlock.Index, 8)
+        .Text("help", new("将燃料放入燃料槽，右侧可查看加工进度。", "Move fuel into the fuel slot. The bar on the right shows processing progress."), Vector3.Zero, 160)
+        .Idle(10).UiDrag("InventoryGrid.0", "FuelSlot", 30).Idle(30)
+        .UiItem("InventoryGrid.0", 0, 0).UiItem("FuelSlot", PlanksBlock.Index, 8)
+        .UiAnimateValue("Progress", 0, 1, 60).Idle(60).UiPoint("ResultSlot", 60).UiItem("ResultSlot", GlassBlock.Index, 1).Idle(60);
+    var dialog = new RealmPonderDialog(builder.Build()); dialog.Update();
+    var project = GameManager.Project;
+    dialog.Player.Seek(35); dialog.RefreshPresentation();
+    Save(dialog, 1280, 720, $"machine-ui-drag-{language}");
+    dialog.Player.Seek(70); dialog.RefreshPresentation();
+    Save(dialog, 1280, 720, $"machine-ui-progress-{language}");
+    var view = dialog.Children.Find<RealmPonderUiWidget>();
+    var original = view.Content;
+    var fuel = original.Children.Find<InventorySlotWidget>("FuelSlot");
+    if (fuel.m_inventory.GetSlotCount(fuel.m_slotIndex) != 8 || Math.Abs(original.Children.Find<ValueBarWidget>("Progress").Value - .5f) > .001f)
+        throw new InvalidOperationException("The machine UI did not follow its timeline.");
+    Save(dialog, 640, 480, $"machine-ui-compact-{language}");
+    Save(dialog, 390, 844, $"machine-ui-portrait-{language}");
+    view.WidgetsHierarchyInput = new(WidgetInputDevice.None);
+    var scrolls = view.AllChildren.OfType<ScrollPanelWidget>().ToArray();
+    float beforePan = scrolls.Sum(s => s.ScrollPosition);
+    Vector2 panStart = (view.GlobalBounds.Min + view.GlobalBounds.Max) / 2;
+    view.Input.Drag = panStart; view.Input.Press = panStart; view.Update();
+    view.Input.Press = panStart - new Vector2(50, 30); view.Update();
+    if (scrolls.Sum(s => s.ScrollPosition) <= beforePan || view.Content.Input.Press.HasValue)
+        throw new InvalidOperationException($"Machine UI panning or input isolation failed: before={beforePan}, after={scrolls.Sum(s => s.ScrollPosition)}, input={view.Content.Input.Press}, bounds={view.GlobalBounds}, size={view.ActualSize}.");
+    Save(dialog, 390, 844, $"machine-ui-panned-{language}");
+    dialog.Player.Seek(5); dialog.RefreshPresentation();
+    view = dialog.Children.Find<RealmPonderUiWidget>();
+    var resetFuel = view.Content.Children.Find<InventorySlotWidget>("FuelSlot");
+    if (ReferenceEquals(original, view.Content) || resetFuel.m_inventory.GetSlotCount(resetFuel.m_slotIndex) != 0 || !ReferenceEquals(project, GameManager.Project))
+        throw new InvalidOperationException("Machine UI replay/isolation failed.");
+    dialog.Close();
+    Console.WriteLine("Machine UI: original furnace XML, isolated inventories, item transfer, value animation, replay and native-scale scrolling passed.");
 }
 
 void VerifyRuntime() {

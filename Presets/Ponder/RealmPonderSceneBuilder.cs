@@ -6,7 +6,7 @@ using RealmEX.Core;
 namespace RealmEX.Presets.Ponder
 {
     /// <summary>Instructions at the cursor run concurrently; only Idle advances the cursor.</summary>
-    public sealed class RealmPonderSceneBuilder
+    public sealed partial class RealmPonderSceneBuilder
     {
         private readonly string m_id;
         private readonly RealmPonderText m_title;

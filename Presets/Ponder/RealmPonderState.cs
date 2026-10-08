@@ -58,6 +58,7 @@ namespace RealmEX.Presets.Ponder
         public float ViewHeight { get; internal set; } = 9;
         public bool ShowShadow { get; internal set; } = true;
         public bool IsFinished { get; internal set; }
+        public RealmPonderUiState Ui { get; internal set; }
         internal RealmPonderState(RealmPonderTutorial tutorial)
         {
             m_blocks = new(tutorial.Schematic.Blocks);

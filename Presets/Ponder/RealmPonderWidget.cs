@@ -25,6 +25,7 @@ namespace RealmEX.Presets.Ponder
             }
         }
         private readonly Dictionary<string, Callout> m_callouts = new(StringComparer.Ordinal);
+        private RealmPonderUiWidget m_ui;
         private Vector2? m_dragPoint;
         private float m_orbit;
         private float m_pitch;
@@ -42,12 +43,19 @@ namespace RealmEX.Presets.Ponder
         {
             bool samePlayer = ReferenceEquals(Player, player);
             Realm = realm; Player = player;
+            if (m_ui != null) { m_ui.Dispose(); Children.Remove(m_ui); m_ui = null; }
             foreach (var callout in m_callouts.Values) Children.Remove(callout);
             m_callouts.Clear(); if (!samePlayer) ResetView(); RefreshPresentation();
         }
         public void ResetView() { m_dragPoint = null; m_orbit = 0; m_pitch = 0; m_zoom = 1; m_inspected = null; }
         public void RefreshPresentation()
         {
+            if (Player?.State.Ui != null)
+            {
+                if (m_ui == null) { m_ui = new(); Children.Insert(0, m_ui); }
+                m_ui.Synchronize(Player.State.Ui, Player.State.Tick, Language);
+            }
+            else if (m_ui != null) { m_ui.Dispose(); Children.Remove(m_ui); m_ui = null; }
             var overlays = Player?.State.Overlays.Values.Where(o => o.Kind is RealmPonderOverlayKind.Text or RealmPonderOverlayKind.Controls).ToDictionary(o => o.Id) ?? [];
             foreach (string id in m_callouts.Keys.Where(id => !overlays.ContainsKey(id)).ToArray()) { Children.Remove(m_callouts[id]); m_callouts.Remove(id); }
             foreach (var overlay in overlays.Values)
@@ -143,6 +151,14 @@ namespace RealmEX.Presets.Ponder
         {
             Vector2 size = new(Size.X >= 0 ? Math.Min(Size.X, parentAvailableSize.X) : parentAvailableSize.X, Size.Y >= 0 ? Math.Min(Size.Y, parentAvailableSize.Y) : parentAvailableSize.Y);
             ConfigureCamera(size);
+            bool stackedUi = m_ui != null && size.X < 1000;
+            float captionHeight = stackedUi && m_callouts.Count > 0 ? Math.Min(124, size.Y * 0.3f) : 0;
+            if (m_ui != null)
+            {
+                Vector2 natural = Player.State.Ui.Definition.Size + new Vector2(0, 40);
+                m_ui.Size = new(Math.Min(natural.X, size.X - 32), Math.Min(natural.Y, size.Y - captionHeight - 24));
+                SetWidgetPosition(m_ui, new(size.X - m_ui.Size.X - 16, Math.Max(8, captionHeight)));
+            }
             float y = 16;
             foreach (var callout in m_callouts.Values)
             {
@@ -151,6 +167,7 @@ namespace RealmEX.Presets.Ponder
                 callout.Label.Measure(new(width - margins, float.PositiveInfinity));
                 if (callout.Overlay.Kind == RealmPonderOverlayKind.Controls) width = Math.Min(width, Math.Max(100, callout.Label.DesiredSize.X + margins));
                 float height = Math.Min(callout.Label.DesiredSize.Y + 20, Math.Max(48, size.Y * 0.42f));
+                if (stackedUi) { width = size.X - 32; height = Math.Min(height, Math.Max(48, captionHeight - 8)); }
                 callout.Size = new(width, height);
                 float x = callout.Overlay.Kind == RealmPonderOverlayKind.Controls && size.X >= 650 ? size.X - width - 16 : 16;
                 Vector2 position = new(x, Math.Min(y, Math.Max(0, size.Y - height)));
@@ -234,7 +251,7 @@ namespace RealmEX.Presets.Ponder
                         batch.QueueDisc(Project(position), new Vector2(3), 0, color * GlobalColorTransform);
                     }
                 }
-                else if (m_callouts.TryGetValue(overlay.Id, out var callout))
+                else if (m_ui == null && m_callouts.TryGetValue(overlay.Id, out var callout))
                 {
                     Vector2 anchor = Project(Anchor(overlay.Position));
                     Vector2 position = GetWidgetPosition(callout) ?? Vector2.Zero;
