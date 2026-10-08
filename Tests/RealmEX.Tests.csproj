@@ -10,5 +10,7 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
     <ProjectReference Include="..\RealmEX.csproj" />
     <EmbeddedResource Include="..\Assets\Dialogs\RealmPonderDialog.xml" LogicalName="PonderDialog.xml" />
+    <EmbeddedResource Include="..\Assets\RealmEX\Ponder\AndGate.xml" LogicalName="AndGate.xml" />
+    <EmbeddedResource Include="..\Assets\RealmEX\Ponder\Pumpkin.xml" LogicalName="Pumpkin.xml" />
   </ItemGroup>
 </Project>

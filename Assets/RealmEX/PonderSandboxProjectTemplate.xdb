@@ -1,11 +1,14 @@
 <RealmEX>
 	<ProjectTemplate Name="RealmEXPonderProject" Guid="a1c4e8f2-3b5d-4e7a-9c1f-2468ace0bdf1">
+		<MemberSubsystemTemplate Name="BlockEntities" Guid="07f65413-ab71-4498-9e24-c76cf00205b2">
+			<Parameter Name="Class" Guid="6e05a70c-cbd8-46cb-a36d-114055b663b8" Value="Game.SubsystemBlockEntities" Type="string" />
+		</MemberSubsystemTemplate>
 		<MemberSubsystemTemplate Name="Players" Guid="b2d5f9a3-4c6e-5f8b-0d2a-3579bdf1ce02" InheritanceParent="30b8559d-fc03-42cb-b716-e985aaac96c0">
 			<Parameter Name="Class" Guid="c3e6a0b4-5d7f-609c-1e3b-4680ce02df13" Value="RealmEX.Subsystems.SandboxSubsystemPlayers" Type="string" />
 			<Parameter Name="Dependencies" Guid="d4f7b1c5-6e80-71ad-2f4c-5791df13e024" Value="" Type="string" />
 		</MemberSubsystemTemplate>
 		<MemberSubsystemTemplate Name="Time" Guid="e5a8c2d6-7f91-82be-305d-6802e024f135" InheritanceParent="73bbc39a-6cf8-470b-b008-fb9aef611caa">
-			<Parameter Name="Class" Guid="f6b9d3e7-80a2-93cf-416e-7913f135a246" Value="RealmEX.Subsystems.SandboxSubsystemTime" Type="string" />
+			<Parameter Name="Class" Guid="f6b9d3e7-80a2-93cf-416e-7913f135a246" Value="RealmEX.Presets.Ponder.Sandbox.PonderSubsystemTime" Type="string" />
 		</MemberSubsystemTemplate>
 		<MemberSubsystemTemplate Name="Update" Guid="a7c0e4f8-91b3-a4d0-527f-8024a246b357" InheritanceParent="743dceeb-03d9-4d12-9c0a-3e9774a6afe6" />
 		<MemberSubsystemTemplate Name="Drawing" Guid="b8d1f5a9-a2c4-b5e1-6380-9135b357c468">

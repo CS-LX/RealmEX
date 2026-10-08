@@ -1,52 +1,64 @@
 using System;
-using RealmEX.Core.Scenes;
-using RealmEX.Core.Storyboard;
+using System.Linq;
 
 namespace RealmEX.Presets.Ponder
 {
-    public static class RealmPonderPlayer
+    /// <summary>20 Hz tutorial clock. Seeking replays the same instructions and animations as playback.</summary>
+    public sealed class RealmPonderPlayer
     {
-        public static RealmStoryboard CreateStoryboard(
-            RealmPonderTutorial tutorial,
-            Action<RealmPonderStep> stepStarted = null,
-            int startStep = 0)
+        public const int TicksPerSecond = 20;
+        private int m_instruction;
+        private double m_accumulator;
+        private float m_speed = 1;
+        public RealmPonderTutorial Tutorial { get; }
+        public RealmPonderState State { get; private set; }
+        public bool IsPaused { get; set; }
+        public bool ComfyReading { get; set; }
+        public bool IsCompleted => State.Tick >= Tutorial.Duration;
+        public int Generation { get; private set; }
+        internal bool HasSession { get; set; }
+        public event Action<RealmPonderState> Resetting;
+        public event Action<RealmPonderState> StateChanged;
+        public float Speed { get => m_speed; set { if (!float.IsFinite(value) || value < 0.25f || value > 4) throw new ArgumentOutOfRangeException(nameof(value)); m_speed = value; } }
+        public int KeyframeIndex => Math.Max(0, Tutorial.Keyframes.TakeWhile(k => k.Tick <= State.Tick).Count() - 1);
+        public RealmPonderPlayer(RealmPonderTutorial tutorial) { Tutorial = tutorial ?? throw new ArgumentNullException(nameof(tutorial)); Replay(); }
+        public void Replay()
         {
-            ArgumentNullException.ThrowIfNull(tutorial);
-            if (startStep < 0 || startStep >= tutorial.StepCount)
+            Generation++; m_accumulator = 0; m_instruction = 0; IsPaused = false;
+            State = new(Tutorial); Resetting?.Invoke(State); ApplyInstructions(); StateChanged?.Invoke(State);
+        }
+        public void Advance(double seconds)
+        {
+            if (!double.IsFinite(seconds) || seconds < 0) throw new ArgumentOutOfRangeException(nameof(seconds));
+            if (IsPaused || IsCompleted) return;
+            m_accumulator += seconds * TicksPerSecond * Speed;
+            while (!IsCompleted)
             {
-                throw new ArgumentOutOfRangeException(nameof(startStep));
+                double cost = ComfyReading && State.Overlays.Values.Any(o => o.Kind == RealmPonderOverlayKind.Text) ? 3 : 1;
+                if (m_accumulator + 1e-8 < cost) break;
+                m_accumulator -= cost; Step();
             }
-            RealmStoryboard storyboard = new();
-            storyboard.EnqueueAsync(async ctx =>
+            if (IsCompleted) m_accumulator = 0;
+            else
             {
-                if (tutorial.Script != null)
-                {
-                    RealmPonderScriptContext ponder = new(ctx, stepStarted, startStep);
-                    await tutorial.Script(ponder);
-                    return;
-                }
-
-                for (int i = 0; i < tutorial.Steps.Count; i++)
-                {
-                    RealmPonderStep step = tutorial.Steps[i];
-                    await ctx.ApplyScene(new RealmScene(step.SceneName, step.TimeFactor));
-                    if (step.BuildsWorld)
-                    {
-                        RealmPonderPumpkinLayouts.Apply(ctx.Realm, step.SceneName);
-                    }
-
-                    if (i < startStep)
-                    {
-                        continue;
-                    }
-                    stepStarted?.Invoke(step);
-                    if (step.WaitGameTimeSeconds > 0.0)
-                    {
-                        await ctx.WaitGameTime(step.WaitGameTimeSeconds);
-                    }
-                }
-            });
-            return storyboard;
+                double cost = ComfyReading && State.Overlays.Values.Any(o => o.Kind == RealmPonderOverlayKind.Text) ? 3 : 1;
+                State.SampleAnimations(State.Tick + (float)(m_accumulator / cost));
+            }
+        }
+        public void Seek(int tick)
+        {
+            tick = Math.Clamp(tick, 0, Tutorial.Duration);
+            bool paused = IsPaused;
+            if (tick < State.Tick) Replay();
+            while (State.Tick < tick) Step();
+            m_accumulator = 0; State.SampleAnimations(State.Tick); IsPaused = paused;
+        }
+        public void SeekKeyframe(int index) => Seek(Tutorial.Keyframes[Math.Clamp(index, 0, Tutorial.Keyframes.Count - 1)].Tick);
+        private void Step() { State.Advance(State.Tick + 1); ApplyInstructions(); StateChanged?.Invoke(State); }
+        private void ApplyInstructions()
+        {
+            while (m_instruction < Tutorial.Instructions.Count && Tutorial.Instructions[m_instruction].Tick <= State.Tick)
+                Tutorial.Instructions[m_instruction++].Apply(State);
         }
     }
 }

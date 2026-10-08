@@ -1,0 +1,10 @@
+<PonderSchematic Version="1">
+  <Fill From="6,1,6" To="10,1,10" Block="planks" />
+  <Fill From="8,2,8" Block="and_gate" />
+  <Fill From="6,2,8" Block="switch" />
+  <Fill From="10,2,8" Block="switch" />
+  <Fill From="7,2,8" Block="wire" />
+  <Fill From="9,2,8" Block="wire" />
+  <Fill From="8,2,7" Block="wire" />
+  <Fill From="8,2,6" Block="led" />
+</PonderSchematic>

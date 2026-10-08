@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Engine;
 using Engine.Graphics;
 using Game;
@@ -6,148 +8,243 @@ using RealmEX.Core;
 
 namespace RealmEX.Presets.Ponder
 {
-    /// <summary>Realm viewport with local orbit/zoom and world-anchored tutorial callouts.</summary>
-    public sealed class RealmPonderWidget : Widget
+    /// <summary>Orbitable scene, timed callouts and transformed block inspection.</summary>
+    public sealed class RealmPonderWidget : CanvasWidget
     {
+        private sealed class Callout : CanvasWidget
+        {
+            public readonly LabelWidget Label = new() { WordWrap = true, FontScale = 1, Color = new(229, 236, 245), IsHitTestVisible = false };
+            public readonly ScrollPanelWidget Scroll = new() { Direction = LayoutDirection.Vertical, Margin = new(14, 10), ScrollPosition = 0, ScrollSpeed = 0 };
+            public readonly RectangleWidget Accent = new() { Size = new(3, float.PositiveInfinity), FillColor = new(158, 199, 234), OutlineColor = Color.Transparent, HorizontalAlignment = WidgetAlignment.Near, IsHitTestVisible = false };
+            public RealmPonderOverlay Overlay;
+            public BlockIconWidget Item;
+            public Callout()
+            {
+                IsHitTestVisible = false;
+                Children.Add(new RectangleWidget { FillColor = new(22, 30, 43, 242), OutlineColor = new(59, 77, 99), IsHitTestVisible = false });
+                Children.Add(Accent); Scroll.Children.Add(Label); Children.Add(Scroll);
+            }
+        }
+        private readonly Dictionary<string, Callout> m_callouts = new(StringComparer.Ordinal);
         private Vector2? m_dragPoint;
         private float m_orbit;
-        private float m_zoom = 1f;
-
-        public Vector2 Size { get; set; } = new(float.PositiveInfinity);
+        private float m_pitch;
+        private float m_zoom = 1;
+        private Matrix m_viewProjection = Matrix.Identity;
+        private (Point3 Position, int Value, float Distance)? m_inspected;
         public SandboxRealm Realm { get; private set; }
-        public RealmPonderAnnotation[] Annotations { get; set; } = Array.Empty<RealmPonderAnnotation>();
-
-        public RealmPonderWidget()
+        public RealmPonderPlayer Player { get; private set; }
+        public bool InspectMode { get; set; }
+        public string Language { get; set; } = LanguageControl.CurrentLanguageName;
+        public event Action<int> SubjectSelected;
+        public string InspectedName => m_inspected.HasValue ? BlocksManager.Blocks[Terrain.ExtractContents(m_inspected.Value.Value)]?.GetDisplayName(Realm?.Project.FindSubsystem<SubsystemTerrain>(false), m_inspected.Value.Value) : null;
+        public RealmPonderWidget() { ClampToBounds = true; IsHitTestVisible = true; }
+        public void Setup(SandboxRealm realm, RealmPonderPlayer player = null)
         {
-            ClampToBounds = true;
-            IsHitTestVisible = true;
+            bool samePlayer = ReferenceEquals(Player, player);
+            Realm = realm; Player = player;
+            foreach (var callout in m_callouts.Values) Children.Remove(callout);
+            m_callouts.Clear(); if (!samePlayer) ResetView(); RefreshPresentation();
         }
-
-        public void Setup(SandboxRealm realm)
+        public void ResetView() { m_dragPoint = null; m_orbit = 0; m_pitch = 0; m_zoom = 1; m_inspected = null; }
+        public void RefreshPresentation()
         {
-            Realm = realm;
-            Annotations = Array.Empty<RealmPonderAnnotation>();
-            ResetView();
-            if (Realm != null) Realm.Viewport.IsEnabled = true;
+            var overlays = Player?.State.Overlays.Values.Where(o => o.Kind is RealmPonderOverlayKind.Text or RealmPonderOverlayKind.Controls).ToDictionary(o => o.Id) ?? [];
+            foreach (string id in m_callouts.Keys.Where(id => !overlays.ContainsKey(id)).ToArray()) { Children.Remove(m_callouts[id]); m_callouts.Remove(id); }
+            foreach (var overlay in overlays.Values)
+            {
+                if (!m_callouts.TryGetValue(overlay.Id, out Callout callout)) { callout = new(); m_callouts.Add(overlay.Id, callout); Children.Add(callout); }
+                if (!ReferenceEquals(callout.Overlay, overlay)) { callout.Scroll.ScrollPosition = 0; callout.Scroll.ScrollSpeed = 0; }
+                callout.Overlay = overlay;
+                string text = overlay.Text.Resolve(Language);
+                if (overlay.Kind == RealmPonderOverlayKind.Controls)
+                {
+                    bool zh = Language.StartsWith("zh", StringComparison.OrdinalIgnoreCase);
+                    text = overlay.Input switch { RealmPonderInput.Interact => zh ? "交互" : "Interact", RealmPonderInput.Use => zh ? "使用" : "Use", RealmPonderInput.Scroll => zh ? "滚动" : "Scroll", _ => zh ? "移动" : "Move" };
+                    if (overlay.Sneak) text = (zh ? "潜行 + " : "Sneak + ") + text;
+                    if (overlay.ItemValue != 0) text += " · " + BlocksManager.Blocks[Terrain.ExtractContents(overlay.ItemValue)].GetDisplayName(Realm?.Project.FindSubsystem<SubsystemTerrain>(false), overlay.ItemValue);
+                    if (overlay.ItemValue != 0 && callout.Item == null)
+                    {
+                        callout.Item = new BlockIconWidget { Size = new(36), HorizontalAlignment = WidgetAlignment.Near, VerticalAlignment = WidgetAlignment.Center, Margin = new(2, 0) };
+                        callout.Children.Add(callout.Item);
+                    }
+                    if (callout.Item != null) { callout.Item.IsVisible = overlay.ItemValue != 0; if (overlay.ItemValue != 0) callout.Item.Value = Terrain.ReplaceLight(overlay.ItemValue, 15); }
+                    callout.Scroll.Margin = new(overlay.ItemValue == 0 ? 14 : 40, 10);
+                }
+                callout.Label.Text = text; callout.Accent.FillColor = overlay.Color;
+                callout.ColorTransform = Color.White * overlay.Opacity(Player.State.Tick);
+                callout.IsVisible = !InspectMode;
+            }
         }
-
-        public void ResetView()
-        {
-            m_dragPoint = null;
-            m_orbit = 0f;
-            m_zoom = 1f;
-        }
-
         public override void Update()
         {
-            if (Input.Tap.HasValue && HitTestGlobal(Input.Tap.Value) == this)
-                m_dragPoint = ScreenToWidget(Input.Tap.Value);
-            if (Input.Press.HasValue && m_dragPoint.HasValue)
+            if (Player == null) return;
+            if (InspectMode)
             {
-                Vector2 current = ScreenToWidget(Input.Press.Value);
-                m_orbit -= (current.X - m_dragPoint.Value.X) * 0.008f;
-                m_dragPoint = current;
+                Vector2? pointer = Input.MousePosition ?? Input.Tap;
+                m_inspected = pointer.HasValue && HitTestGlobal(pointer.Value) == this ? Pick(ScreenToWidget(pointer.Value)) : null;
+                if (Input.Click.HasValue && HitTestGlobal(Input.Click.Value.End) == this)
+                {
+                    var selected = Pick(ScreenToWidget(Input.Click.Value.End));
+                    if (selected.HasValue) SubjectSelected?.Invoke(Terrain.ExtractContents(selected.Value.Value));
+                }
             }
-            else if (!Input.Press.HasValue) m_dragPoint = null;
+            else
+            {
+                if (Input.Tap.HasValue && HitTestGlobal(Input.Tap.Value) == this) m_dragPoint = ScreenToWidget(Input.Tap.Value);
+                if (Input.Press.HasValue && m_dragPoint.HasValue)
+                {
+                    Vector2 current = ScreenToWidget(Input.Press.Value);
+                    m_orbit -= (current.X - m_dragPoint.Value.X) * 0.008f;
+                    m_pitch = Math.Clamp(m_pitch + (current.Y - m_dragPoint.Value.Y) * 0.005f, -0.5f, 0.65f);
+                    m_dragPoint = current;
+                }
+                else if (!Input.Press.HasValue) m_dragPoint = null;
+            }
             if (Input.Scroll.HasValue)
             {
                 Vector3 scroll = Input.Scroll.Value;
-                if (HitTestGlobal(new Vector2(scroll.X, scroll.Y)) == this)
-                    m_zoom = Math.Clamp(m_zoom * MathF.Pow(0.9f, scroll.Z), 0.65f, 1.6f);
+                if (HitTestGlobal(new(scroll.X, scroll.Y)) == this) m_zoom = Math.Clamp(m_zoom * MathF.Pow(0.9f, scroll.Z), 0.55f, 1.8f);
             }
         }
-
-        public override void UpdateCeases()
+        public override void UpdateCeases() { m_dragPoint = null; base.UpdateCeases(); }
+        private (Point3 Position, int Value, float Distance)? Pick(Vector2 point)
         {
-            m_dragPoint = null;
-            base.UpdateCeases();
+            Vector3 clip = new(2 * point.X / ActualSize.X - 1, 1 - 2 * point.Y / ActualSize.Y, 0);
+            Matrix inverse = Matrix.Invert(m_viewProjection);
+            Vector3 near = Vector3.Transform(clip, inverse), far = Vector3.Transform(clip + Vector3.UnitZ, inverse);
+            return Player.State.Raycast(new Ray3(near, Vector3.Normalize(far - near)));
         }
-
-        public override void Draw(DrawContext dc)
+        private void ConfigureCamera(Vector2 size)
         {
-            if (Realm == null || Realm.IsDisposed || ActualSize.X <= 0f || ActualSize.Y <= 0f) return;
-            // Flush the parent UI before changing render targets. Size in physical pixels for crisp edges.
-            dc.PrimitivesRenderer2D.Flush();
-            float scale = Math.Min(Math.Min(Math.Max(GlobalScale, 1f), 2f), 2048f / Math.Max(ActualSize.X, ActualSize.Y));
-            Point2 renderSize = new(Math.Clamp((int)MathF.Round(ActualSize.X * scale), 1, 2048),
-                Math.Clamp((int)MathF.Round(ActualSize.Y * scale), 1, 2048));
-            Vector3 position = Realm.Viewport.LookPosition;
-            float worldHeight = Realm.Viewport.OrthographicWorldHeight;
-            Viewport previousViewport = Display.Viewport;
-            Rectangle previousScissor = Display.ScissorRectangle;
-            try
-            {
-                Vector3 relative = position - Realm.Viewport.LookTarget;
-                relative = Vector3.Transform(relative, Matrix.CreateRotationY(m_orbit));
-                Realm.Viewport.LookPosition = Realm.Viewport.LookTarget + relative;
-                float aspect = ActualSize.X / ActualSize.Y;
-                Realm.Viewport.OrthographicWorldHeight = Math.Max(worldHeight, 9f / aspect) * m_zoom;
-                Realm.Draw(renderSize);
-            }
-            finally
-            {
-                Realm.Viewport.LookPosition = position;
-                Realm.Viewport.OrthographicWorldHeight = worldHeight;
-                Display.Viewport = previousViewport;
-                Display.ScissorRectangle = previousScissor;
-            }
-            Texture2D texture = Realm.Viewport.Texture;
-            if (texture == null) return;
-            TexturedBatch2D batch = dc.PrimitivesRenderer2D.TexturedBatch(texture, false, 0,
-                DepthStencilState.None, RasterizerState.CullNoneScissor, BlendState.AlphaBlend, SamplerState.LinearClamp);
-            int count = batch.TriangleVertices.Count;
-            batch.QueueQuad(Vector2.Zero, ActualSize, 0f, Vector2.Zero, Vector2.One, GlobalColorTransform);
-            batch.TransformTriangles(GlobalTransform, count);
-            dc.PrimitivesRenderer2D.Flush();
-            DrawAnnotations(dc);
+            if (Player == null || size.X <= 0 || size.Y <= 0) return;
+            var s = Player.State; float yaw = MathUtils.DegToRad(s.CameraYaw) + m_orbit;
+            float distance = MathF.Sqrt(s.CameraRadius * s.CameraRadius + s.CameraHeight * s.CameraHeight);
+            float pitch = Math.Clamp(MathF.Atan2(s.CameraHeight, s.CameraRadius) + m_pitch, 0.15f, 1.4f);
+            Vector3 position = s.CameraTarget + new Vector3(MathF.Sin(yaw) * distance * MathF.Cos(pitch), distance * MathF.Sin(pitch), MathF.Cos(yaw) * distance * MathF.Cos(pitch));
+            float height = Math.Max(s.ViewHeight, 7f * size.Y / size.X) * m_zoom;
+            float offset = size.X >= 850 ? 0.04f : size.X > size.Y ? 0.18f : 0;
+            Vector3 shift = Vector3.Normalize(Vector3.Cross(s.CameraTarget - position, Vector3.UnitY)) * (height * size.X / size.Y * offset);
+            Vector3 target = s.CameraTarget - shift; position -= shift;
+            m_viewProjection = Matrix.CreateLookAt(position, target, Vector3.UnitY) * Matrix.CreateOrthographic(height * size.X / size.Y, height, 0.1f, 1000);
+            if (Realm != null) { Realm.Viewport.LookTarget = target; Realm.Viewport.LookPosition = position; Realm.Viewport.OrthographicWorldHeight = height; }
         }
-
-        private Vector2 Project(Vector3 position)
+        private Vector2 Project(Vector3 point)
         {
-            Vector3 clip = Vector3.Transform(position, Realm.Viewport.Camera.ViewProjectionMatrix);
-            return new Vector2((clip.X + 1f) * ActualSize.X * 0.5f, (1f - clip.Y) * ActualSize.Y * 0.5f);
+            Vector3 clip = Vector3.Transform(point, m_viewProjection);
+            return new((clip.X + 1) * ActualSize.X / 2, (1 - clip.Y) * ActualSize.Y / 2);
         }
-
-        private void DrawAnnotations(DrawContext dc)
+        private Vector3 Anchor(Vector3 point)
         {
-            FlatBatch2D lines = dc.PrimitivesRenderer2D.FlatBatch(1);
-            FontBatch2D font = dc.PrimitivesRenderer2D.FontBatch(LabelWidget.BitmapFont, 2);
-            int lineStart = lines.LineVertices.Count;
-            int triangleStart = lines.TriangleVertices.Count;
-            int textStart = font.TriangleVertices.Count;
-            foreach (RealmPonderAnnotation annotation in Annotations)
-            {
-                Vector2 anchor = Project(annotation.Position);
-                if (anchor.X < 0 || anchor.Y < 0 || anchor.X > ActualSize.X || anchor.Y > ActualSize.Y) continue;
-                Color color = annotation.Color * GlobalColorTransform;
-                Vector2 textSize = LabelWidget.BitmapFont.MeasureText(annotation.Text, new Vector2(0.65f), Vector2.Zero);
-                Vector2 boxSize = textSize + new Vector2(20f, 14f);
-                Vector2 center = anchor + annotation.LabelOffset;
-                center.X = Math.Clamp(center.X, boxSize.X / 2, Math.Max(boxSize.X / 2, ActualSize.X - boxSize.X / 2));
-                center.Y = Math.Clamp(center.Y, boxSize.Y / 2, Math.Max(boxSize.Y / 2, ActualSize.Y - boxSize.Y / 2));
-                Vector2 half = boxSize / 2;
-                Vector2 lineEnd = new(center.X, center.Y + (anchor.Y >= center.Y ? half.Y : -half.Y));
-                lines.QueueLine(anchor, lineEnd, 0f, color);
-                lines.QueueDisc(anchor, new Vector2(3f), 0f, color);
-                lines.QueueQuad(center - half, center + half, 0f, new Color(23, 26, 32, 240) * GlobalColorTransform);
-                lines.QueueQuad(center - half, new Vector2(center.X + half.X, center.Y - half.Y + 2f), 0f, color);
-                // A small footprint highlights the device without hiding its mesh.
-                Vector3 p = annotation.Position;
-                Vector3[] corners = [p + new Vector3(-0.52f, -0.12f, -0.52f), p + new Vector3(0.52f, -0.12f, -0.52f),
-                    p + new Vector3(0.52f, -0.12f, 0.52f), p + new Vector3(-0.52f, -0.12f, 0.52f)];
-                for (int i = 0; i < 4; i++) lines.QueueLine(Project(corners[i]), Project(corners[(i + 1) % 4]), 0f, color);
-                font.QueueText(annotation.Text, center, 0f, color,
-                    TextAnchor.HorizontalCenter | TextAnchor.VerticalCenter, new Vector2(0.65f));
-            }
-            lines.TransformLines(GlobalTransform, lineStart);
-            lines.TransformTriangles(GlobalTransform, triangleStart);
-            font.TransformTriangles(GlobalTransform, textStart);
+            Point3 cell = new((int)MathF.Floor(point.X), (int)MathF.Floor(point.Y), (int)MathF.Floor(point.Z));
+            var section = Player.State.Sections.Values.FirstOrDefault(s => s.Selection.Contains(cell));
+            return section == null ? point : Vector3.Transform(point, section.Transform);
         }
-
         public override void MeasureOverride(Vector2 parentAvailableSize)
         {
-            IsDrawRequired = true;
-            DesiredSize = Vector2.Min(Size, parentAvailableSize);
+            Vector2 size = new(Size.X >= 0 ? Math.Min(Size.X, parentAvailableSize.X) : parentAvailableSize.X, Size.Y >= 0 ? Math.Min(Size.Y, parentAvailableSize.Y) : parentAvailableSize.Y);
+            ConfigureCamera(size);
+            float y = 16;
+            foreach (var callout in m_callouts.Values)
+            {
+                float width = Math.Min(350, Math.Max(80, size.X > size.Y && size.X < 850 ? size.X * 0.43f : size.X - 32));
+                float margins = callout.Item?.IsVisible == true ? 80 : 28;
+                callout.Label.Measure(new(width - margins, float.PositiveInfinity));
+                if (callout.Overlay.Kind == RealmPonderOverlayKind.Controls) width = Math.Min(width, Math.Max(100, callout.Label.DesiredSize.X + margins));
+                float height = Math.Min(callout.Label.DesiredSize.Y + 20, Math.Max(48, size.Y * 0.42f));
+                callout.Size = new(width, height);
+                float x = callout.Overlay.Kind == RealmPonderOverlayKind.Controls && size.X >= 650 ? size.X - width - 16 : 16;
+                Vector2 position = new(x, Math.Min(y, Math.Max(0, size.Y - height)));
+                switch (callout.Overlay.Placement)
+                {
+                    case RealmPonderTextPlacement.TopLeft: position = new(16, 16); break;
+                    case RealmPonderTextPlacement.TopRight: position = new(size.X - width - 16, 16); break;
+                    case RealmPonderTextPlacement.BottomLeft: position = new(16, size.Y - height - 16); break;
+                    case RealmPonderTextPlacement.BottomRight: position = size - new Vector2(width + 16, height + 16); break;
+                    case RealmPonderTextPlacement.NearTarget:
+                        Vector3 clip = Vector3.Transform(Anchor(callout.Overlay.Position), m_viewProjection);
+                        position = new((clip.X + 1) * size.X / 2 - width / 2, (1 - clip.Y) * size.Y / 2 - height - 32); break;
+                }
+                position = Vector2.Max(Vector2.Zero, Vector2.Min(position, size - new Vector2(width, height)));
+                SetWidgetPosition(callout, position);
+                y += height + 8;
+            }
+            base.MeasureOverride(size); DesiredSize = size; IsDrawRequired = true;
+        }
+        public override void Draw(DrawContext dc)
+        {
+            if (Player == null || ActualSize.X <= 0 || ActualSize.Y <= 0) return;
+            ConfigureCamera(ActualSize);
+            if (Player.State.ShowShadow)
+            {
+                var shadow = dc.PrimitivesRenderer2D.FlatBatch(); int start = shadow.TriangleVertices.Count;
+                shadow.QueueDisc(Project(Player.State.CameraTarget - new Vector3(0, 1, 0)), new Vector2(ActualSize.Y * 0.31f, ActualSize.Y * 0.09f), 0, new Color(0, 0, 0, 65) * GlobalColorTransform);
+                shadow.TransformTriangles(GlobalTransform, start);
+            }
+            if (Realm != null && !Realm.IsDisposed)
+            {
+                dc.PrimitivesRenderer2D.Flush();
+                float scale = Math.Min(Math.Clamp(GlobalScale, 1, 2), 2048f / Math.Max(ActualSize.X, ActualSize.Y));
+                Point2 renderSize = new(Math.Max(1, (int)MathF.Round(ActualSize.X * scale)), Math.Max(1, (int)MathF.Round(ActualSize.Y * scale)));
+                Viewport viewport = Display.Viewport; Rectangle scissor = Display.ScissorRectangle;
+                try { Realm.Draw(renderSize); }
+                finally { Display.Viewport = viewport; Display.ScissorRectangle = scissor; }
+                m_viewProjection = Realm.Viewport.Camera.ViewProjectionMatrix;
+                var texture = dc.PrimitivesRenderer2D.TexturedBatch(Realm.Viewport.Texture, false, 0, DepthStencilState.None, RasterizerState.CullNoneScissor, BlendState.AlphaBlend, SamplerState.LinearClamp);
+                int start = texture.TriangleVertices.Count;
+                texture.QueueQuad(Vector2.Zero, ActualSize, 0, Vector2.Zero, Vector2.One, GlobalColorTransform); texture.TransformTriangles(GlobalTransform, start);
+                dc.PrimitivesRenderer2D.Flush();
+            }
+            DrawOverlays(dc);
+        }
+        private void DrawOverlays(DrawContext dc)
+        {
+            var batch = dc.PrimitivesRenderer2D.FlatBatch(1); int lines = batch.LineVertices.Count, triangles = batch.TriangleVertices.Count;
+            void Line(Vector3 a, Vector3 b, Color color) => batch.QueueLine(Project(a), Project(b), 0, color * GlobalColorTransform);
+            void Outline(RealmPonderSelection selection, Color color)
+            {
+                foreach (Point3 cell in selection)
+                {
+                    Vector3 origin = new(cell.X, cell.Y, cell.Z);
+                    var section = Player.State.Sections.Values.FirstOrDefault(s => s.Selection.Contains(cell));
+                    if (section == null || section.Opacity <= 0.2f) continue;
+                    Vector3[] corners = new Vector3[8];
+                    for (int i = 0; i < 8; i++) corners[i] = Vector3.Transform(origin + new Vector3(i & 1, (i >> 1) & 1, (i >> 2) & 1), section.Transform);
+                    for (int i = 0; i < 8; i++) for (int axis = 1; axis <= 4; axis *= 2) if ((i & axis) == 0) Line(corners[i], corners[i | axis], color);
+                }
+            }
+            if (InspectMode && m_inspected.HasValue) Outline(new([m_inspected.Value.Position]), new(250, 216, 132));
+            if (!InspectMode) foreach (var overlay in Player.State.Overlays.Values)
+            {
+                Color color = overlay.Color * overlay.Opacity(Player.State.Tick);
+                if (overlay.Kind == RealmPonderOverlayKind.Outline) Outline(overlay.Selection, color);
+                else if (overlay.Kind == RealmPonderOverlayKind.Bounds)
+                {
+                    Vector3[] corners = new Vector3[8];
+                    for (int i = 0; i < 8; i++) corners[i] = new((i & 1) == 0 ? overlay.Position.X : overlay.End.X, (i & 2) == 0 ? overlay.Position.Y : overlay.End.Y, (i & 4) == 0 ? overlay.Position.Z : overlay.End.Z);
+                    for (int i = 0; i < 8; i++) for (int axis = 1; axis <= 4; axis *= 2) if ((i & axis) == 0) Line(corners[i], corners[i | axis], color);
+                }
+                else if (overlay.Kind == RealmPonderOverlayKind.Line) Line(Anchor(overlay.Position), Anchor(overlay.End), color);
+                else if (overlay.Kind is RealmPonderOverlayKind.Success or RealmPonderOverlayKind.Particle)
+                {
+                    float time = (Player.State.Tick - overlay.StartTick) / 20f;
+                    for (int i = 0; i < 10; i++)
+                    {
+                        float angle = i * MathF.Tau / 10;
+                        Vector3 position = overlay.Position + new Vector3(MathF.Cos(angle), 0.5f, MathF.Sin(angle)) * time * 0.65f + overlay.End * time;
+                        batch.QueueDisc(Project(position), new Vector2(3), 0, color * GlobalColorTransform);
+                    }
+                }
+                else if (m_callouts.TryGetValue(overlay.Id, out var callout))
+                {
+                    Vector2 anchor = Project(Anchor(overlay.Position));
+                    Vector2 position = GetWidgetPosition(callout) ?? Vector2.Zero;
+                    Vector2 end = new(Math.Clamp(anchor.X, position.X, position.X + callout.ActualSize.X), position.Y + callout.ActualSize.Y);
+                    batch.QueueLine(anchor, end, 0, color * GlobalColorTransform);
+                    batch.QueueDisc(anchor, new Vector2(3), 0, color * GlobalColorTransform);
+                }
+            }
+            batch.TransformLines(GlobalTransform, lines); batch.TransformTriangles(GlobalTransform, triangles);
         }
     }
 }

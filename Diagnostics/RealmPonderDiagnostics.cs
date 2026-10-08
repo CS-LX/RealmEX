@@ -29,8 +29,9 @@ namespace RealmEX.Diagnostics
                 }
 
                 stage = "create-dialog";
-                RealmPonderTutorial tutorial = RealmPonderSamples.CreateAndGateTutorial();
-                m_dialog = new RealmPonderDialog(tutorial);
+                RealmPonderRegistry registry = RealmPonderSamples.CreateRegistry();
+                RealmPonderTutorial tutorial = registry.Get("realmex:and_gate");
+                m_dialog = new RealmPonderDialog(tutorial, registry);
                 DialogsManager.ShowDialog(RealmPonderDialog.FindHostWidget(), m_dialog);
                 Engine.Log.Information(
                     $"[RealmEX/Ponder] START tutorial={tutorial.Id} title=\"{tutorial.Title}\" mode=visible-dialog blocks=true");

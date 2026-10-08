@@ -1,0 +1,17 @@
+<CanvasWidget xmlns="runtime-namespace:Game" xmlns:p="runtime-namespace:RealmEX.Presets.Ponder">
+  <RectangleWidget FillColor="12,18,29,252" OutlineColor="63,81,104" IsHitTestVisible="False" />
+  <StackPanelWidget Direction="Vertical" Margin="20,16">
+    <CanvasWidget Name="Index.Header" Size="-1,56">
+      <LabelWidget Name="Index.Title" FontScale="1" VerticalAlignment="Center" />
+      <p:RealmPonderButtonWidget Name="Index.Close" Icon="Close" HorizontalAlignment="Far" VerticalAlignment="Center" />
+    </CanvasWidget>
+    <LabelWidget Name="Index.SearchLabel" FontScale="1" Margin="0,8" />
+    <CanvasWidget Size="-1,48">
+      <RectangleWidget FillColor="26,36,50" OutlineColor="63,81,104" IsHitTestVisible="False" />
+      <TextBoxWidget Name="Index.Search" Margin="10,4" />
+    </CanvasWidget>
+    <CanvasWidget Size="-1,56" Margin="0,8"><ListPanelWidget Name="Index.Tags" Direction="Horizontal" ItemSize="180" /></CanvasWidget>
+    <ListPanelWidget Name="Index.Scenes" Direction="Vertical" ItemSize="88" />
+    <LabelWidget Name="Index.Empty" FontScale="1" WordWrap="True" Margin="0,8" />
+  </StackPanelWidget>
+</CanvasWidget>

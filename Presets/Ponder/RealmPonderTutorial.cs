@@ -1,56 +1,32 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Linq;
+using RealmEX.Core;
 
 namespace RealmEX.Presets.Ponder
 {
+    public sealed record RealmPonderKeyframe(int Tick, RealmPonderText Title);
+    internal sealed record RealmPonderInstruction(int Tick, Action<RealmPonderState> Apply);
+    /// <summary>Compiled scene. Duration and keyframes come from the authored schedule.</summary>
     public sealed class RealmPonderTutorial
     {
-        private readonly List<RealmPonderStep> m_steps = [];
-
-        public RealmPonderTutorial(string id, string title, int expectedStepCount = 0)
-        {
-            if (string.IsNullOrWhiteSpace(id))
-            {
-                throw new ArgumentException("Tutorial id cannot be empty.", nameof(id));
-            }
-            if (string.IsNullOrWhiteSpace(title))
-            {
-                throw new ArgumentException("Tutorial title cannot be empty.", nameof(title));
-            }
-
-            Id = id.Trim();
-            Title = title.Trim();
-            ExpectedStepCount = expectedStepCount;
-        }
-
         public string Id { get; }
-
-        public string Title { get; }
-
-        public IReadOnlyList<RealmPonderStep> Steps => m_steps;
-
-        public int ExpectedStepCount { get; private set; }
-
-        public int StepCount => ExpectedStepCount > 0 ? ExpectedStepCount : m_steps.Count;
-
-        public Func<RealmPonderScriptContext, Task> Script { get; private set; }
-
-        public RealmPonderTutorial AddStep(RealmPonderStep step)
+        public RealmPonderText Title { get; }
+        public RealmPonderSchematic Schematic { get; }
+        public IReadOnlyList<RealmPonderKeyframe> Keyframes { get; }
+        public int Duration { get; }
+        public bool NextUpEnabled { get; }
+        public string ProjectTemplateName { get; }
+        internal IReadOnlyList<RealmPonderInstruction> Instructions { get; }
+        internal RealmPonderTutorial(string id, RealmPonderText title, RealmPonderSchematic schematic,
+            IEnumerable<RealmPonderInstruction> instructions, IEnumerable<RealmPonderKeyframe> keyframes, int duration, bool nextUpEnabled, string projectTemplateName)
         {
-            m_steps.Add(step ?? throw new ArgumentNullException(nameof(step)));
-            return this;
-        }
-
-        public RealmPonderTutorial SetScript(Func<RealmPonderScriptContext, Task> script, int expectedStepCount)
-        {
-            Script = script ?? throw new ArgumentNullException(nameof(script));
-            if (expectedStepCount <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(expectedStepCount), "Expected step count must be positive.");
-            }
-            ExpectedStepCount = expectedStepCount;
-            return this;
+            if (string.IsNullOrWhiteSpace(id) || !id.Contains(':')) throw new ArgumentException("Use a namespaced tutorial ID.", nameof(id));
+            Id = id; Title = title ?? throw new ArgumentNullException(nameof(title)); Schematic = schematic;
+            Instructions = Array.AsReadOnly(instructions.OrderBy(i => i.Tick).ToArray());
+            Keyframes = Array.AsReadOnly(keyframes.OrderBy(i => i.Tick).ToArray());
+            Duration = Math.Max(1, duration); NextUpEnabled = nextUpEnabled;
+            ProjectTemplateName = projectTemplateName;
         }
     }
 }

@@ -11,12 +11,14 @@
 | 包名 | `com.realmex` |
 | 当前版本 | `1.0.0.0-preview1`（见 `modinfo.json`） |
 | 目标框架 | `net10.0` |
-| 宿主 API | `SurvivalcraftAPI.Survivalcraft` 1.9.2 |
+| 宿主 API | `SurvivalcraftAPI.Survivalcraft` 1.9.3.1 |
 | 模组依赖 | 无（仅宿主） |
 
 ## 当前进度
 
-P1 / P2 / P3a 核心已完成：`SandboxProject`、`RealmHost.TickParallel`、`SandboxRealm`、`RealmScene` 与 `RealmStoryboard` 已通过 F8 / F9 / F10 游戏内诊断。P3b 已完成模块边界归类，核心运行时位于 `Core`，诊断位于 `Diagnostics`，并预留 `Presets.Ponder` / `Presets.Create`。P3c 已落地 `RealmViewport` 离屏渲染核心与基础 `RealmPonderWidget`；M1T 已通过 F7 BlockEntity 注册与 Terrain cell 变更隔离游戏内诊断；P3d-async 已通过 F10 async Storyboard 诊断；P3d / P3e 已通过可见 Ponder Dialog；**P3f 正在做南瓜真实方块教程**（Create 式分步，Core soft freeze）；**P4 可选持久化已延后**。详情见 `docs/实施计划.md`。
+**2026-10-08 Ponder 更新**：统一 20 Hz 时间轴、可回退的真实沙箱会话、区域/镜头/物品/模型动画、限时标注、操作提示、教程搜索与分类、方块查看模式已接入三个内置教程。F6 默认打开与门。对照版本、API 迁移、宿主适配边界和验证结果见 [Ponder 对齐与接入](docs/Ponder对齐与接入.md)。
+
+P1 / P2 / P3a 核心已完成：`SandboxProject`、`RealmHost.TickParallel`、`SandboxRealm`、`RealmScene` 与 `RealmStoryboard` 已通过 F8 / F9 / F10 游戏内诊断。核心运行时位于 `Core`，诊断位于 `Diagnostics`，教程位于 `Presets.Ponder`。`RealmViewport` 提供离屏渲染；M1T 已通过 F7 BlockEntity 注册与 Terrain cell 隔离诊断。Ponder 本轮重构通过逻辑测试和独立真实引擎验收，玩家主世界里的新版 F6 仍需现场验证。Core 保持 soft freeze，P4 可选持久化仍延后。详情见 `docs/实施计划.md`。
 
 ## 文档
 
@@ -107,18 +109,18 @@ M1T-3 起通过时会输出：
 ## P3e / P3f 可见 Ponder Dialog 入口
 
 1. 构建并部署 RealmEX，启动游戏后进入任意主世界。
-2. 日志出现 `[RealmEX/Ponder] READY ... tutorial=pumpkin` 后按一次 **F6**。
-3. 应弹出南瓜教程页：视口里按步骤出现田地、瓜苗、生长中的南瓜、成熟南瓜与南瓜灯，并配有说明文字。
+2. 日志出现 `[RealmEX/Ponder] READY ... tutorial=and-gate` 后按一次 **F6**。
+3. 应弹出与门教程。右上角目录可以切换到非门或南瓜；场景内显示限时文字、定位线和高亮。
 4. 等待步骤播完后点「关闭」，或中途 Esc / 返回关闭。
 5. 检查 Mods 目录上一级的 `Game.log`（或 `Bugs/Game.log`），搜索 `[RealmEX/Ponder]`。
 
 通过时会输出：
 
 ```text
-[RealmEX/Ponder] RESULT=PASS tutorial=realmex:pumpkin mode=visible-dialog blocks=true
+[RealmEX/Ponder] RESULT=PASS tutorial=realmex:and_gate mode=visible-dialog blocks=true
 ```
 
-该入口把真实方块写入 `RealmEXPonderProject` 沙箱 Terrain，并以 Create 式分步展示南瓜种植；尚不含通用文件配置协议与标注箭头。
+该入口把真实方块写入 `RealmEXPonderProject` 沙箱 Terrain，使用与独立渲染验收相同的时间轴、会话、界面和 Shader。布局采用 XML + 调色板解析，脚本采用 C# 指令；当前验证范围见 [Ponder 对齐与接入](docs/Ponder对齐与接入.md)。
 
 ## 内容模组接入（规划）
 
