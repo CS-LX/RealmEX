@@ -94,6 +94,13 @@ namespace RealmEX.Presets.Ponder
             "Inspect" => Local("查看方块与相关教程", "Inspect blocks and related tutorials"),
             "Reading" => Local("舒适阅读：有文字时放慢播放", "Comfy reading: slow down while text is visible"), _ => ""
         };
+        public override void ChangeParent(ContainerWidget parentWidget)
+        {
+            base.ChangeParent(parentWidget);
+            // The full-screen tutorial already paints its own shade. Keep the host's input shield without double dimming.
+            if (parentWidget != null && DialogsManager.m_animationData.TryGetValue(this, out var animation))
+                animation.CoverWidget.FillColor = Color.Transparent;
+        }
         public override void MeasureOverride(Vector2 available)
         {
             float width = Math.Max(1, Math.Min(1200, available.X - 32));

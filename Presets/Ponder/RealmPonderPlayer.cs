@@ -12,6 +12,8 @@ namespace RealmEX.Presets.Ponder
         private float m_speed = 1;
         public RealmPonderTutorial Tutorial { get; }
         public RealmPonderState State { get; private set; }
+        /// <summary>Fractional scene time for rendering between deterministic simulation ticks.</summary>
+        public float PresentationTick { get; private set; }
         public bool IsPaused { get; set; }
         public bool ComfyReading { get; set; }
         public bool IsCompleted => State.Tick >= Tutorial.Duration;
@@ -24,7 +26,7 @@ namespace RealmEX.Presets.Ponder
         public RealmPonderPlayer(RealmPonderTutorial tutorial) { Tutorial = tutorial ?? throw new ArgumentNullException(nameof(tutorial)); Replay(); }
         public void Replay()
         {
-            Generation++; m_accumulator = 0; m_instruction = 0; IsPaused = false;
+            Generation++; m_accumulator = 0; m_instruction = 0; PresentationTick = 0; IsPaused = false;
             State = new(Tutorial); Resetting?.Invoke(State); ApplyInstructions(); StateChanged?.Invoke(State);
         }
         public void Advance(double seconds)
@@ -38,11 +40,12 @@ namespace RealmEX.Presets.Ponder
                 if (m_accumulator + 1e-8 < cost) break;
                 m_accumulator -= cost; Step();
             }
-            if (IsCompleted) m_accumulator = 0;
+            if (IsCompleted) { m_accumulator = 0; PresentationTick = State.Tick; }
             else
             {
                 double cost = ComfyReading && State.Overlays.Values.Any(o => o.Kind == RealmPonderOverlayKind.Text) ? 3 : 1;
-                State.SampleAnimations(State.Tick + (float)(m_accumulator / cost));
+                PresentationTick = State.Tick + (float)(m_accumulator / cost);
+                State.SampleAnimations(PresentationTick);
             }
         }
         public void Seek(int tick)
@@ -51,7 +54,7 @@ namespace RealmEX.Presets.Ponder
             bool paused = IsPaused;
             if (tick < State.Tick) Replay();
             while (State.Tick < tick) Step();
-            m_accumulator = 0; State.SampleAnimations(State.Tick); IsPaused = paused;
+            m_accumulator = 0; PresentationTick = State.Tick; State.SampleAnimations(PresentationTick); IsPaused = paused;
         }
         public void SeekKeyframe(int index) => Seek(Tutorial.Keyframes[Math.Clamp(index, 0, Tutorial.Keyframes.Count - 1)].Tick);
         private void Step() { State.Advance(State.Tick + 1); ApplyInstructions(); StateChanged?.Invoke(State); }

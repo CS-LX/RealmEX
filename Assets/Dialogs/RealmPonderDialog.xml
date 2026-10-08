@@ -1,5 +1,5 @@
 <CanvasWidget xmlns="runtime-namespace:Game" xmlns:p="runtime-namespace:RealmEX.Presets.Ponder">
-  <RectangleWidget FillColor="0,0,0,160" OutlineColor="0,0,0,0" IsHitTestVisible="False" />
+  <RectangleWidget FillColor="0,0,0,48" OutlineColor="0,0,0,0" IsHitTestVisible="False" />
   <CanvasWidget Name="Ponder.Frame" HorizontalAlignment="Center" VerticalAlignment="Center">
   <StackPanelWidget Name="Ponder.Content" Direction="Vertical">
     <CanvasWidget Name="Ponder.Header" Size="-1,88">

@@ -7,13 +7,61 @@ namespace RealmEX.Tests;
 
 public sealed class PonderUiTests
 {
+    [Fact]
+    public void CursorMovesBetweenSimulationTicksAndHonorsPauseSeekAndReplay()
+    {
+        var builder = new RealmPonderSceneBuilder("test:cursor", "Cursor", new([]));
+        builder.ShowUi(new("Machine", new(614, 382), () => new Machine())).UiDrag("Run", "Meter", 12).Idle(20);
+        var player = new RealmPonderPlayer(builder.Build());
+        for (int frame = 1; frame <= 36; frame++)
+        {
+            player.Advance(1d / 60);
+            Assert.Equal(frame / 3, player.State.Tick);
+            Assert.Equal(frame / 36f, player.State.Ui.Cue.Progress(player.PresentationTick), 5);
+        }
+        player.Seek(0); player.Advance(1d / 120);
+        float paused = player.PresentationTick;
+        Assert.True(paused > 0); Assert.Equal(0, player.State.Tick);
+        player.IsPaused = true; player.Advance(10); Assert.Equal(paused, player.PresentationTick);
+        player.Seek(5); Assert.Equal(5, player.PresentationTick); Assert.True(player.IsPaused);
+        player.Replay(); Assert.Equal(0, player.PresentationTick);
+        player.Advance(10); Assert.Equal(player.Tutorial.Duration, player.PresentationTick);
+    }
+    [Fact]
+    public void CursorInterpolationUsesReadingSpeedWithoutChangingScriptTiming()
+    {
+        var builder = new RealmPonderSceneBuilder("test:reading-cursor", "Cursor", new([]));
+        builder.ShowUi(new("Machine", new(614, 382), () => new Machine())).UiDrag("Run", "Meter", 12)
+            .Text("caption", "Read", Vector3.Zero, 20).Idle(20);
+        var player = new RealmPonderPlayer(builder.Build()) { ComfyReading = true, Speed = 2 };
+        player.Advance(.025);
+        Assert.Equal(0, player.State.Tick); Assert.Equal(1f / 3, player.PresentationTick, 5);
+        Assert.Equal(1f / 36, player.State.Ui.Cue.Progress(player.PresentationTick), 5);
+    }
     sealed class Machine : CanvasWidget
     {
         public int Clicks;
+        public int Layouts;
         public readonly ClickableWidget Run = new() { Name = "Run", IsAutoCheckingEnabled = true };
         public readonly ValueBarWidget Meter = new() { Name = "Meter" };
         public Machine() { Size = new(614, 382); Children.Add(Run); Children.Add(Meter); }
         public override void Update() { if (Run.IsClicked) Clicks++; }
+        public override void MeasureOverride(Vector2 available) { Layouts++; base.MeasureOverride(available); }
+    }
+    [Fact]
+    public void SynchronizingCursorFramesDoesNotRepeatFullUiLayout()
+    {
+        var builder = new RealmPonderSceneBuilder("test:layout", "UI", new([]));
+        builder.ShowUi(new("Machine", new(614, 382), () => new Machine())).UiValue("Meter", .5f)
+            .UiDrag("Run", "Meter", 12).Idle(20);
+        var player = new RealmPonderPlayer(builder.Build());
+        using var view = new RealmPonderUiWidget();
+        view.Synchronize(player.State.Ui, player.PresentationTick, "en-US");
+        var machine = (Machine)view.Content;
+        int initialLayouts = machine.Layouts;
+        Assert.True(initialLayouts > 0);
+        for (int i = 0; i < 30; i++) { player.Advance(1d / 60); view.Synchronize(player.State.Ui, player.PresentationTick, "en-US"); }
+        Assert.Equal(initialLayouts, machine.Layouts); Assert.Equal(.5f, machine.Meter.Value);
     }
     [Fact]
     public void UiClickUsesOriginalHandlerOnceAndBackseekCreatesFreshState()

@@ -53,7 +53,7 @@ namespace RealmEX.Presets.Ponder
             if (Player?.State.Ui != null)
             {
                 if (m_ui == null) { m_ui = new(); Children.Insert(0, m_ui); }
-                m_ui.Synchronize(Player.State.Ui, Player.State.Tick, Language);
+                m_ui.Synchronize(Player.State.Ui, Player.PresentationTick, Language);
             }
             else if (m_ui != null) { m_ui.Dispose(); Children.Remove(m_ui); m_ui = null; }
             var overlays = Player?.State.Overlays.Values.Where(o => o.Kind is RealmPonderOverlayKind.Text or RealmPonderOverlayKind.Controls).ToDictionary(o => o.Id) ?? [];

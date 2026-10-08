@@ -22,6 +22,7 @@ namespace RealmEX.Presets.Ponder
         private RealmPonderUiCue m_revealedCue;
         private Vector2 m_revealedSize;
         private Vector2? m_pan;
+        private ClickableWidget m_pressed;
         public CanvasWidget Content { get; private set; }
         public RealmPonderUiWidget()
         {
@@ -30,7 +31,7 @@ namespace RealmEX.Presets.Ponder
             Children.Add(m_titleFrame); m_titleFrame.Children.Add(m_title); Children.Add(m_scrollFrame); m_scrollFrame.Children.Add(m_vertical);
             m_vertical.Children.Add(m_horizontalFrame); m_horizontalFrame.Children.Add(m_horizontal); m_horizontal.Children.Add(m_surface);
         }
-        public void Synchronize(RealmPonderUiState state, int tick, string language)
+        public void Synchronize(RealmPonderUiState state, float tick, string language)
         {
             if (!ReferenceEquals(state, m_state))
             {
@@ -56,20 +57,20 @@ namespace RealmEX.Presets.Ponder
             m_cue.Content = Content; m_cue.Cue = state.Cue; m_cue.Tick = tick;
             m_cue.IsVisible = state.Cue != null && tick < state.Cue.StartTick + state.Cue.Duration;
             m_title.Text = state.Definition.Title.Resolve(language) + (language.StartsWith("zh", StringComparison.OrdinalIgnoreCase) ? " · 操作演示" : " · Demonstration");
-            // Layout is needed before a scripted click/drag locates an existing control.
-            Widget.LayoutWidgetsHierarchy(Content, state.Definition.Size);
+            // Only pending edits need an extra layout for scripted clicks. The host lays out the visible tree each frame.
+            if (m_applied < state.Edits.Count) Widget.LayoutWidgetsHierarchy(Content, state.Definition.Size);
             while (m_applied < state.Edits.Count) state.Edits[m_applied++](Content, language);
             if (state.Cue != null)
             {
                 Find(Content, state.Cue.Target);
                 if (!string.IsNullOrEmpty(state.Cue.From)) Find(Content, state.Cue.From);
             }
-            foreach (ClickableWidget click in Content.AllChildren.OfType<ClickableWidget>()) click.IsPressed = false;
+            if (m_pressed != null) { m_pressed.IsPressed = false; m_pressed = null; }
             if (state.Cue is { Action: RealmPonderUiAction.Click } cue && tick < cue.StartTick + cue.Duration)
             {
                 Widget target = Find(Content, cue.Target);
                 var click = target as ClickableWidget ?? (target as ContainerWidget)?.AllChildren.OfType<ClickableWidget>().FirstOrDefault();
-                if (click != null) click.IsPressed = cue.Progress(tick) is > 0.35f and < 0.7f;
+                if (click != null) { m_pressed = click; click.IsPressed = cue.Progress(tick) is > 0.35f and < 0.7f; }
             }
         }
         internal static Widget Find(CanvasWidget root, string name)
@@ -138,7 +139,7 @@ namespace RealmEX.Presets.Ponder
         {
             public CanvasWidget Content;
             public RealmPonderUiCue Cue;
-            public int Tick;
+            public float Tick;
             public override void MeasureOverride(Vector2 available) { base.MeasureOverride(available); IsDrawRequired = true; }
             public override void Draw(DrawContext dc)
             {
@@ -162,6 +163,7 @@ namespace RealmEX.Presets.Ponder
         }
         private void Release()
         {
+            if (m_pressed != null) { m_pressed.IsPressed = false; m_pressed = null; }
             if (Content is IDisposable disposable) disposable.Dispose();
             m_surface.Children.Clear(); Content = null; m_cue.Content = null; m_cue.Cue = null;
         }

@@ -10,7 +10,7 @@ namespace RealmEX.Presets.Ponder
     public enum RealmPonderUiAction { Point, Click, Drag, Scroll }
     public sealed record RealmPonderUiCue(string Target, string From, RealmPonderUiAction Action, int StartTick, int Duration)
     {
-        public float Progress(int tick) => Math.Clamp((tick - StartTick) / (float)Math.Max(1, Duration), 0, 1);
+        public float Progress(float tick) => Math.Clamp((tick - StartTick) / Math.Max(1, Duration), 0, 1);
     }
     /// <summary>A fresh, isolated widget tree is created for every show/replay. Never return a player's live UI.</summary>
     public sealed class RealmPonderUiDefinition

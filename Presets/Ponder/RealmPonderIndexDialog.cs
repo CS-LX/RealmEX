@@ -63,6 +63,12 @@ namespace RealmEX.Presets.Ponder
             m_scenes.ScrollSpeed = 0;
             Children.Find<LabelWidget>("Index.Empty").IsVisible = m_scenes.Items.Count == 0;
         }
+        public override void ChangeParent(ContainerWidget parentWidget)
+        {
+            base.ChangeParent(parentWidget);
+            if (parentWidget != null && DialogsManager.m_animationData.TryGetValue(this, out var animation))
+                animation.CoverWidget.FillColor = new Color(0, 0, 0, 48);
+        }
         public override void MeasureOverride(Vector2 available)
         {
             Size = new(Math.Min(720, available.X - 32), Math.Min(640, available.Y - 32));

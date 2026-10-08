@@ -1,5 +1,5 @@
 <CanvasWidget xmlns="runtime-namespace:Game" xmlns:p="runtime-namespace:RealmEX.Presets.Ponder">
-  <RectangleWidget FillColor="0,0,0,200" OutlineColor="0,0,0,0" IsHitTestVisible="False" />
+  <RectangleWidget FillColor="0,0,0,96" OutlineColor="0,0,0,0" IsHitTestVisible="False" />
   <StackPanelWidget Direction="Vertical" Margin="20,16">
     <CanvasWidget Name="Index.Header" Size="-1,56">
       <LabelWidget Name="Index.Title" FontScale="1" VerticalAlignment="Center" />
