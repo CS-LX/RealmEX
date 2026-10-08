@@ -1,16 +1,11 @@
 using System;
 using System.Collections.Generic;
-using Engine.Input;
 using Game;
-using GameEntitySystem;
 using RealmEX.Core;
-using RealmEX.Diagnostics;
+using RealmEX.Presets.Ponder;
 
 namespace RealmEX
 {
-    /// <summary>
-    /// RealmEX 模组入口，负责 RealmHost 的初始化与主世界退出清理。
-    /// </summary>
     public class RealmEXLoader : ModLoader
     {
         public override void __ModInitialize()
@@ -18,65 +13,26 @@ namespace RealmEX
             base.__ModInitialize();
             ModsManager.RegisterHook("OnLoadingFinished", this);
             ModsManager.RegisterHook("SubsystemUpdate", this);
-            ModsManager.RegisterHook("OnProjectLoaded", this);
+            ModsManager.RegisterHook("OnShowDialog", this);
             ModsManager.RegisterHook("OnProjectDisposed", this);
         }
-
         public override void OnLoadingFinished(List<Action> actions)
         {
             base.OnLoadingFinished(actions);
+            RealmPonderBrowser.Reset();
             RealmHost.Initialize();
         }
-
         public override void SubsystemUpdate(SubsystemUpdate subsystemUpdate, float dt)
         {
-            if (!ReferenceEquals(subsystemUpdate.Project, GameManager.Project))
-            {
-                return;
-            }
-
-            RealmHost.TickParallel(dt);
-            RealmPonderDiagnostics.Update(subsystemUpdate);
-            RealmM2Diagnostics.Update(subsystemUpdate);
-            RealmM3Diagnostics.Update(subsystemUpdate);
-
-            if (Keyboard.IsKeyDownOnce(Key.F6))
-            {
-                RealmPonderDiagnostics.Start();
-            }
-            if (Keyboard.IsKeyDownOnce(Key.F7))
-            {
-                RealmM1TDiagnostics.Run();
-            }
-            if (Keyboard.IsKeyDownOnce(Key.F8))
-            {
-                RealmM1Diagnostics.Run();
-            }
-            if (Keyboard.IsKeyDownOnce(Key.F9))
-            {
-                RealmM2Diagnostics.Start();
-            }
-            if (Keyboard.IsKeyDownOnce(Key.F10))
-            {
-                RealmM3Diagnostics.Start();
-            }
+            if (ReferenceEquals(subsystemUpdate.Project, GameManager.Project)) RealmHost.TickParallel(dt);
         }
-
-        public override void OnProjectLoaded(Project project)
+        public override void OnShowDialog(ref ContainerWidget parentWidget, ref Dialog dialog)
         {
-            Engine.Log.Information("[RealmEX/Ponder] READY tutorial=and-gate mode=visible-dialog action=PressF6");
-            Engine.Log.Information("[RealmEX/M1T] READY scope=TerrainIsolation action=PressF7");
-            Engine.Log.Information("[RealmEX/M1] READY scope=P1Core action=PressF8");
-            Engine.Log.Information("[RealmEX/M2] READY scope=P2Tick action=PressF9");
-            Engine.Log.Information("[RealmEX/M3] READY scope=P3Scene action=PressF10");
-            base.OnProjectLoaded(project);
+            if (dialog is GameMenuDialog menu && parentWidget != null) RealmPonderBrowser.AddMenuEntry(menu, parentWidget);
         }
-
         public override void OnProjectDisposed()
         {
-            RealmPonderDiagnostics.Cancel();
-            RealmM2Diagnostics.Cancel();
-            RealmM3Diagnostics.Cancel();
+            RealmPonderBrowser.Reset();
             RealmHost.DisposeAll();
             base.OnProjectDisposed();
         }

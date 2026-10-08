@@ -61,15 +61,9 @@ function Resolve-PackageBaseName {
     return $DefaultName
 }
 
-$BuildOutputDir = $BuildOutputDir.TrimEnd('\', '/') + '\'
+$BuildOutputDir = [IO.Path]::GetFullPath($BuildOutputDir).TrimEnd('\', '/') + '\'
 $ScriptDir = $PSScriptRoot
 $ConfigPath = Join-Path $ScriptDir "pack.config.json"
-$sevenZipCandidates = @(
-    (Join-Path $ScriptDir "7z\7z.exe"),
-    (Join-Path (Join-Path $ScriptDir "..\..\SCIENEW\tools\7z") "7z.exe"),
-    (Join-Path (Join-Path $ScriptDir "..\..\..\SCIENEW\tools\7z") "7z.exe")
-)
-$sevenZipExe = $sevenZipCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
 
 if (-not (Test-Path $BuildOutputDir)) {
     Write-Error "[PackMod] ERROR: Build output directory does not exist: $BuildOutputDir"
@@ -114,8 +108,7 @@ $packageBaseName = Resolve-PackageBaseName `
     -ExplicitVersion $Version `
     -IsArtifactOutput $useArtifactNaming
 
-$TempZip = Join-Path $env:TEMP "$packageBaseName.zip"
-$ScmodFile = Join-Path $env:TEMP "$packageBaseName.scmod"
+$TempZip = Join-Path $env:TEMP ("RealmEX-" + [Guid]::NewGuid().ToString('N') + '.scmod')
 $DestFile = Join-Path $DestDir "$packageBaseName.scmod"
 
 Write-Host ""
@@ -126,29 +119,32 @@ Write-Host "[PackMod] Source  : $BuildOutputDir" -ForegroundColor Cyan
 Write-Host "[PackMod] Target  : $DestFile" -ForegroundColor Cyan
 Write-Host "[PackMod] ----------------------------------------" -ForegroundColor Cyan
 
-if (Test-Path $TempZip) { Remove-Item $TempZip -Force }
-if (Test-Path $ScmodFile) { Remove-Item $ScmodFile -Force }
-
 Write-Host "[PackMod] Compressing (plaintext)..." -ForegroundColor Cyan
-Push-Location $BuildOutputDir
+# Package current source assets only. Incremental build directories can retain deleted diagnostic templates.
+$packageFiles = @(Get-ChildItem -LiteralPath $BuildOutputDir -File | Where-Object { $_.Extension -in '.dll', '.json', '.png', '.pdb' })
+$sourceRoot = Split-Path $ScriptDir -Parent
+foreach ($directory in @('Assets', 'ThirdParty')) {
+    foreach ($sourceFile in Get-ChildItem -LiteralPath (Join-Path $sourceRoot $directory) -File -Recurse) {
+        $relative = $sourceFile.FullName.Substring($sourceRoot.Length + 1)
+        $builtFile = Join-Path $BuildOutputDir $relative
+        if (Test-Path -LiteralPath $builtFile -PathType Leaf) { $packageFiles += Get-Item -LiteralPath $builtFile }
+    }
+}
 try {
-    if ($sevenZipExe) {
-        & $sevenZipExe a -tzip -mx=1 -r "$TempZip" "*" | Out-Null
-        if ($LASTEXITCODE -ne 0) {
-            Write-Error "[PackMod] ERROR: 7z compression failed (exit code: $LASTEXITCODE)."
-            exit 1
+    Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
+    $archive = [IO.Compression.ZipFile]::Open($TempZip, [IO.Compression.ZipArchiveMode]::Create)
+    try {
+        foreach ($file in $packageFiles) {
+            $entry = $file.FullName.Substring($BuildOutputDir.Length).Replace('\', '/')
+            [IO.Compression.ZipFileExtensions]::CreateEntryFromFile($archive, $file.FullName, $entry, [IO.Compression.CompressionLevel]::Fastest) | Out-Null
         }
     }
-    else {
-        Compress-Archive -Path * -DestinationPath $TempZip -Force
-    }
+    finally { $archive.Dispose() }
+    Move-Item -LiteralPath $TempZip -Destination $DestFile -Force
 }
 finally {
-    Pop-Location
+    if (Test-Path -LiteralPath $TempZip) { Remove-Item -LiteralPath $TempZip -Force }
 }
-
-Move-Item $TempZip $ScmodFile -Force
-Move-Item $ScmodFile $DestFile -Force
 
 Write-Host "[PackMod] OK - Packaged: $DestFile" -ForegroundColor Green
 Write-Host ""

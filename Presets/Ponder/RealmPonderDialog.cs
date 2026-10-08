@@ -5,7 +5,6 @@ using System.Xml.Linq;
 using Engine;
 using Engine.Input;
 using Game;
-using GameEntitySystem;
 using RealmEX.Core;
 
 namespace RealmEX.Presets.Ponder
@@ -192,7 +191,7 @@ namespace RealmEX.Presets.Ponder
                 m_sequence = subjects ?? m_registry.Search().Select(e => e.Tutorial).ToArray();
                 SelectTutorial(tutorial);
             }, () => { m_index = null; Player.IsPaused = paused; }, subjects);
-            DialogsManager.ShowDialog(FindHostWidget(), m_index);
+            DialogsManager.ShowDialog(ParentWidget ?? throw new InvalidOperationException("The tutorial must be attached before opening its index."), m_index);
         }
         public void Close()
         {
@@ -203,13 +202,6 @@ namespace RealmEX.Presets.Ponder
         private void CleanupRealm()
         {
             m_viewport?.Setup(null); m_session?.Dispose(); m_session = null;
-        }
-        public static ContainerWidget FindHostWidget()
-        {
-            Project project = GameManager.Project;
-            SubsystemPlayers players = project?.FindSubsystem<SubsystemPlayers>(false);
-            if (players != null && players.ComponentPlayers.Count > 0 && players.ComponentPlayers[0]?.GuiWidget != null) return players.ComponentPlayers[0].GuiWidget;
-            return ScreensManager.RootWidget ?? throw new InvalidOperationException("No dialog host widget available.");
         }
     }
 }

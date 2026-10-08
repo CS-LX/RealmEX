@@ -56,12 +56,7 @@
 		<Compile Include="Core\Storyboard\RealmSceneStep.cs" />
 		<Compile Include="Core\Storyboard\RealmStoryboard.cs" />
 		<Compile Include="Core\Storyboard\RealmWaitFramesStep.cs" />
-		<Compile Include="Diagnostics\RealmM1Diagnostics.cs" />
-		<Compile Include="Diagnostics\RealmM1TDiagnosticSubsystems.cs" />
-		<Compile Include="Diagnostics\RealmM1TDiagnostics.cs" />
-		<Compile Include="Diagnostics\RealmM2Diagnostics.cs" />
-		<Compile Include="Diagnostics\RealmM3Diagnostics.cs" />
-		<Compile Include="Diagnostics\RealmPonderDiagnostics.cs" />
+		<Compile Include="Presets\Ponder\RealmPonderBrowser.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderBlockPresenter.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderButtonWidget.cs" />
 		<Compile Include="Presets\Ponder\RealmPonderDialog.cs" />
@@ -101,9 +96,7 @@
 		<None Update="Assets\RealmEX\SandboxProjectTemplate.xdb">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Update="Assets\RealmEX\SandboxTerrainProjectTemplate.xdb">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
+		<None Update="Assets\Widgets\RealmPonderMenuEntry.xml;Assets\Lang\*.json"><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory></None>
 		<None Update="Assets\RealmEX\PonderSandboxProjectTemplate.xdb">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
