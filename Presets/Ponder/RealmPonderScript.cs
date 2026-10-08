@@ -52,6 +52,7 @@ namespace RealmEX.Presets.Ponder
                     case "camera": builder.ConfigureCamera(V(0), F(1), F(2)); break;
                     case "rotateCamera": builder.RotateCamera(F(0), T(1)); break;
                     case "section": builder.IndependentSection(S(0), Box(1)); break;
+                    case "merge": builder.MergeSection(S(0), S(1)); break;
                     case "show": builder.ShowSection(S(0), V(1), T(2)); break;
                     case "hide": builder.HideSection(S(0), V(1), T(2)); break;
                     case "move": builder.MoveSection(S(0), V(1), T(2)); break;
@@ -97,7 +98,7 @@ namespace RealmEX.Presets.Ponder
                     delete globalThis.__emit;
                     const api = {};
                     api.t = (key, ...args) => Object.freeze({key, args});
-                    for (const op of ['idle','keyframe','camera','rotateCamera','section','show','hide','move','rotate','fill','restore','text','outline','line','removeOverlay','item','moveItem','removeItem','success','finish','uiShow','uiHide','uiText','uiFont','uiButtonColor','uiEnabled','uiVisible','uiValue','uiConfigure','uiAnimateValue','uiInventory','uiItem','uiButton','uiPoint','uiClick','uiDrag','uiScroll'])
+                    for (const op of ['idle','keyframe','camera','rotateCamera','section','merge','show','hide','move','rotate','fill','restore','text','outline','line','removeOverlay','item','moveItem','removeItem','success','finish','uiShow','uiHide','uiText','uiFont','uiButtonColor','uiEnabled','uiVisible','uiValue','uiConfigure','uiAnimateValue','uiInventory','uiItem','uiButton','uiPoint','uiClick','uiDrag','uiScroll'])
                         api[op] = (...args) => emit(JSON.stringify({op, args}));
                     let seed = 1;
                     Math.random = () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 4294967296; };

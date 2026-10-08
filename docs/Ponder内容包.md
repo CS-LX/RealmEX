@@ -78,6 +78,7 @@ scene.uiHide();
 | `idle` / `keyframe` | ticks / text |
 | `camera` / `rotateCamera` | target, viewHeight, yaw / degrees, duration |
 | `section` | id, from, to |
+| `merge` | sourceSectionId, targetSectionId；将源部件并入目标并删除源名称 |
 | `show` / `hide` / `move` / `rotate` | sectionId, vector, duration |
 | `fill` / `restore` | from, to, paletteIdOrValue / from, to |
 | `text` | id, text, target, duration |
@@ -94,6 +95,8 @@ scene.uiHide();
 | `uiButton` | grid, name, text, column, row, [width,height] |
 | `uiPoint` / `uiClick` | target, duration |
 | `uiDrag` / `uiScroll` | fromTarget, toTarget, duration / target, absolutePosition, duration |
+
+管道、电缆与所接设备可先分别出现，再用 `merge` 并入同一部件。该部件生成真实相邻网格，避免将每个接头隔离成独立部件后缺少连接臂；合并沿用目标部件的显示与变换状态，之后不再使用源名称。
 
 目标可以用 `/` 限定控件路径，例如 `RunButton/BevelledButton.Canvas`。`uiConfigure` 通过宿主原有 XML 属性加载器设置当前独立实例，可补齐原机器构造器中的边距、字号及自定义量表阈值，例如 `scene.uiConfigure('TemperatureBar', { WarningValue: '0.73' })`。不修改原机器的控件实现或资源默认值。
 

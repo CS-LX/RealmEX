@@ -109,6 +109,22 @@ public sealed class PonderContentTests
             Assert.Equal(1, new RealmPonderPlayer(entry.Tutorial).State.Blocks[new(0, 1, 0)]);
         Assert.Equal(2, registry.Search("建造", language: "zh-CN").Count);
     }
+    [Fact]
+    public void ScriptCanMergeAConnectedAssemblyAndReplayBeforeTheMerge()
+    {
+        var builder = new RealmPonderSceneBuilder("test:assembly", "Assembly", new([]));
+        RealmPonderScript.Compile(builder, """
+            scene.fill([0,1,0],[1,1,0], 3);
+            scene.section('pipe', [0,1,0], [0,1,0]);
+            scene.section('port', [1,1,0], [1,1,0]);
+            scene.show('pipe', [0,0,0], 0); scene.idle(10);
+            scene.merge('port', 'pipe'); scene.idle(10);
+            """, "assembly.pjs", new Dictionary<string, int>(), new Dictionary<string, RealmPonderUiDefinition>());
+        var player = new RealmPonderPlayer(builder.Build()); player.Seek(15);
+        Assert.False(player.State.Sections.ContainsKey("port")); Assert.Equal(2, player.State.Sections["pipe"].Selection.Count);
+        Assert.Equal(1, player.State.Sections["pipe"].Opacity);
+        player.Seek(5); Assert.True(player.State.Sections.ContainsKey("port")); Assert.Single(player.State.Sections["pipe"].Selection);
+    }
     [Theory]
     [InlineData("Series='missing'")]
     [InlineData("Includes='../common.pjs'")]
